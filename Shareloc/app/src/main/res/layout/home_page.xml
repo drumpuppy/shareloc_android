@@ -13,7 +13,8 @@
         android:text="SHARELOC"
         android:textSize="20sp"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="155dp" />
+        tools:layout_editor_absoluteX="155dp"
+        tools:ignore="MissingConstraints" />
 
     <ImageView
         android:id="@+id/imageView"
@@ -21,5 +22,6 @@
         android:layout_height="741dp"
         app:srcCompat="@drawable/carte_du_monde"
         tools:layout_editor_absoluteX="-22dp"
-        tools:layout_editor_absoluteY="-7dp" />
+        tools:layout_editor_absoluteY="-7dp"
+        tools:ignore="MissingConstraints" />
 </androidx.constraintlayout.widget.ConstraintLayout>

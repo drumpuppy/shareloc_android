@@ -1,16 +1,12 @@
 package com.example.shareloc;
 
-        import android.view.View;
+import android.view.View;
 
-        import androidx.annotation.Nullable;
-        import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
-        import android.os.Bundle;
-        import android.view.View;
-        import android.widget.Button;
-        import android.widget.TextView;
+import android.os.Bundle;
 
-        import java.security.SecureRandom;
 
 public class homePage extends AppCompatActivity implements View.OnClickListener {
         @Override
