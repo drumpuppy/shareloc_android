@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "544815699234",
+    "project_id": "shareloc-81dfb",
+    "storage_bucket": "shareloc-81dfb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:544815699234:android:249d899402a99e7224017b",
+        "android_client_info": {
+          "package_name": "com.example.shareloc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWumhGJVS1YpPBPlfucbeYrN9AA6x5avU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
