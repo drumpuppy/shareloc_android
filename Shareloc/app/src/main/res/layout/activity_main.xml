@@ -12,12 +12,7 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            tools:ignore="MissingConstraints" />
+        <include layout="@layout/toolbar_layout"/>
 
         <FrameLayout
             android:id="@+id/fragment_container"
@@ -66,13 +61,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/btn_logout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Logout" />
-
         </LinearLayout>
 
     </com.google.android.material.navigation.NavigationView>
