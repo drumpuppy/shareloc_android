@@ -2,4 +2,5 @@
     <string name="app_name">Shareloc</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="map_id">5285f8b09606d67e</string>
 </resources>
