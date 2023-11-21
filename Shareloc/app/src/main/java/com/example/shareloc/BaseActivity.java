@@ -30,20 +30,31 @@ public abstract class BaseActivity extends AppCompatActivity implements Navigati
 
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(this);
+        }
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close
+        );
 
-        mAuth = FirebaseAuth.getInstance();
 
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            redirectToLogin();
+        if (drawer != null) {
+            drawer.addDrawerListener(toggle);
         }
 
         toggle.syncState();
+
+        mAuth = FirebaseAuth.getInstance();
+        checkCurrentUser();
+    }
+
+    private void checkCurrentUser() {
+        if (mAuth.getCurrentUser() == null) {
+            redirectToLogin();
+        }
     }
 
     protected abstract int getLayoutId();
@@ -66,10 +77,11 @@ public abstract class BaseActivity extends AppCompatActivity implements Navigati
             startActivity(new Intent(this, homePage.class));
         } else if (id == R.id.nav_amis && !(this instanceof AmisActivity)) {
             startActivity(new Intent(this, AmisActivity.class));
+        } else if (id == R.id.nav_user && !(this instanceof UserProfileActivity)) {
+            startActivity(new Intent(this, UserProfileActivity.class));
         } else if (id == R.id.nav_logout) {
             logout();
         }
-        // Add similar checks for other navigation items
 
         drawer.closeDrawer(GravityCompat.START);
         return true;

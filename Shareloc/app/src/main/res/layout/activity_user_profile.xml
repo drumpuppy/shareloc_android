@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include layout="@layout/toolbar_layout"/>
+
+        <Button
+            android:id="@+id/buttonLogout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonSaveChanges"
+            android:layout_marginStart="23dp"
+            android:layout_marginBottom="11dp"
+            android:text="@string/logout"
+            app:layout_constraintBottom_toTopOf="@+id/buttonSaveChanges"
+            app:layout_constraintStart_toStartOf="@+id/buttonSaveChanges" />
+
+        <Button
+            android:id="@+id/buttonSaveChanges"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewAchievements"
+            android:layout_marginBottom="90dp"
+            android:text="@string/save_changes"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/textViewAchievements"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewAchievementsLabel"
+            android:layout_marginTop="18dp"
+            android:padding="8dp"
+            android:text="@string/none"
+            android:textAppearance="?attr/textAppearanceBody1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewAchievementsLabel" />
+
+        <TextView
+            android:id="@+id/textViewCountriesVisitedLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/editTextNickname"
+            android:layout_marginTop="63dp"
+            android:text="@string/countries_visited"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editTextNickname" />
+
+        <EditText
+            android:id="@+id/editTextNickname"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="205dp"
+            android:hint="@string/nickname"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textViewCountriesVisited"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewCountriesVisitedLabel"
+            android:layout_marginTop="11dp"
+            android:padding="8dp"
+            android:text="@string/none"
+            android:textAppearance="?attr/textAppearanceBody1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCountriesVisitedLabel" />
+
+        <TextView
+            android:id="@+id/textViewAchievementsLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewCountriesVisited"
+            android:layout_marginTop="51dp"
+            android:text="@string/achievements"
+            android:textAppearance="?attr/textAppearanceSubtitle1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCountriesVisited" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:menu="@menu/drawer_menu">
+    </com.google.android.material.navigation.NavigationView>
+
+</androidx.drawerlayout.widget.DrawerLayout>
