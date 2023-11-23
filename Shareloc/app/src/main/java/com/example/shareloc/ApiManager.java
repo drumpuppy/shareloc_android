@@ -17,6 +17,4 @@ public class ApiManager {
     public void updateUser(String userId, User user) {
         usersRef.child(userId).setValue(user);
     }
-
-    // ... other methods ...
 }

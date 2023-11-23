@@ -9,9 +9,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import androidx.annotation.NonNull;
+
+import android.text.TextUtils;
 import android.util.Log;
 import android.os.Bundle;
-import android.widget.Toolbar;
+
+import java.util.List;
+import java.util.Map;
 
 
 public class UserProfileActivity extends BaseActivity {
@@ -22,6 +26,12 @@ public class UserProfileActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        binding = ActivityUserProfileBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        apiManager = new ApiManager();
+        loadUserData();
+        binding.buttonSaveChanges.setOnClickListener(v -> updateUserData());
+
     }
 
     @Override
@@ -41,6 +51,28 @@ public class UserProfileActivity extends BaseActivity {
                     User user = dataSnapshot.getValue(User.class);
                     if (user != null) {
                         binding.editTextNickname.setText(user.getNickname());
+
+                        List<String> countriesVisited = user.getCountriesVisited();
+                        if (countriesVisited != null && !countriesVisited.isEmpty()) {
+                            String countries = TextUtils.join(", ", countriesVisited);
+                            binding.textViewCountriesVisited.setText(countries);
+                        } else {
+                            binding.textViewCountriesVisited.setText(R.string.none);
+                        }
+
+                        Map<String, Boolean> achievements = user.getAchievements();
+                        if (achievements != null && !achievements.isEmpty()) {
+                            StringBuilder achievementsText = new StringBuilder();
+                            for (Map.Entry<String, Boolean> entry : achievements.entrySet()) {
+                                achievementsText.append(entry.getKey())
+                                        .append(": ")
+                                        .append(entry.getValue() ? "Achieved" : "Not achieved")
+                                        .append("\n");
+                            }
+                            binding.textViewAchievements.setText(achievementsText.toString());
+                        } else {
+                            binding.textViewAchievements.setText(R.string.none);
+                        }
                     }
                 }
 
@@ -53,13 +85,20 @@ public class UserProfileActivity extends BaseActivity {
     }
 
 
+
     private void updateUserData() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             String userId = currentUser.getUid();
             String nickname = binding.editTextNickname.getText().toString();
-            User updatedUser = new User(currentUser.getEmail(), nickname);
+
+            // Log for debugging
+            Log.d("UserProfileActivity", "Updating user: " + userId + " with nickname: " + nickname);
+
+            User updatedUser = new User(currentUser.getEmail());
             apiManager.updateUser(userId, updatedUser);
+        } else {
+            Log.w("UserProfileActivity", "No authenticated user found");
         }
     }
 
