@@ -1,14 +1,14 @@
 {
   "project_info": {
-    "project_number": "544815699234",
-    "firebase_url": "https://shareloc-81dfb-default-rtdb.europe-west1.firebasedatabase.app",
-    "project_id": "shareloc-81dfb",
-    "storage_bucket": "shareloc-81dfb.appspot.com"
+    "project_number": "825718161954",
+    "firebase_url": "https://shareloc-cfe58-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "shareloc-cfe58",
+    "storage_bucket": "shareloc-cfe58.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:544815699234:android:249d899402a99e7224017b",
+        "mobilesdk_app_id": "1:825718161954:android:bcc0f1142a05178fb7807b",
         "android_client_info": {
           "package_name": "com.example.shareloc"
         }
@@ -16,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCWumhGJVS1YpPBPlfucbeYrN9AA6x5avU"
+          "current_key": "AIzaSyChZYA66NeFTbk-uWwaHKedEc27UO_Vjrc"
         }
       ],
       "services": {
