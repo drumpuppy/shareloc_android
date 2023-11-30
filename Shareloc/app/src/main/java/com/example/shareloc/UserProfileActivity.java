@@ -92,10 +92,9 @@ public class UserProfileActivity extends BaseActivity {
             String userId = currentUser.getUid();
             String nickname = binding.editTextNickname.getText().toString();
 
-            // Log for debugging
             Log.d("UserProfileActivity", "Updating user: " + userId + " with nickname: " + nickname);
 
-            User updatedUser = new User(currentUser.getEmail());
+            User updatedUser = new User(currentUser.getEmail(), nickname);
             apiManager.updateUser(userId, updatedUser);
         } else {
             Log.w("UserProfileActivity", "No authenticated user found");

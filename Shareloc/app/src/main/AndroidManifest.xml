@@ -15,7 +15,7 @@
         <activity android:name=".AmisActivity" android:exported="false" />
         <activity android:name=".UserProfileActivity" android:exported="false" />
         <activity android:name=".User" android:exported="false" />
-        <activity android:name=".homePage" android:exported="false" />
+        <activity android:name=".homePageActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

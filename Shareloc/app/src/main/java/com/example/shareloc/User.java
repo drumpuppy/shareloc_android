@@ -18,9 +18,9 @@ public class User {
         this.countriesVisited = new ArrayList<>();
         this.achievements = createDefaultAchievements();
     }
-    public User(String username) {
+    public User(String username,String nickname) {
         this.username = username;
-        this.nickname = "";
+        this.nickname = nickname;
         this.countriesVisited = new ArrayList<>();
         this.achievements = createDefaultAchievements();
     }

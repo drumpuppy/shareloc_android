@@ -11,9 +11,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
-import com.google.firebase.auth.FirebaseUser;
 
 
 public abstract class BaseActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -73,8 +70,8 @@ public abstract class BaseActivity extends AppCompatActivity implements Navigati
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_home && !(this instanceof homePage)) {
-            startActivity(new Intent(this, homePage.class));
+        if (id == R.id.nav_home && !(this instanceof homePageActivity)) {
+            startActivity(new Intent(this, homePageActivity.class));
         } else if (id == R.id.nav_amis && !(this instanceof AmisActivity)) {
             startActivity(new Intent(this, AmisActivity.class));
         } else if (id == R.id.nav_user && !(this instanceof UserProfileActivity)) {
