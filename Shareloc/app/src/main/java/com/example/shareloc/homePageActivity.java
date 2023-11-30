@@ -23,6 +23,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class homePageActivity extends BaseActivity implements OnMapReadyCallback {
@@ -85,11 +87,14 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                 LOCATION_PERMISSION_REQUEST_CODE);
                 }
-                //String geoJsonData = loadGeoJsonFromAsset("france.geojson");
-                String geoJsonData = loadGeoJsonFromAsset("italy.geojson");
 
-                if (geoJsonData != null) {
-                        addGeoJsonLayerToMap(mMap, geoJsonData);
+                Map<String, String> allGeoJsonData = loadAllGeoJsonFromAssets();
+
+                for (String country : allGeoJsonData.keySet()) {
+                        String geoJsonData = allGeoJsonData.get(country);
+                        if (geoJsonData != null) {
+                                addGeoJsonLayerToMap(mMap, geoJsonData);
+                        }
                 }
         }
 
@@ -110,21 +115,28 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                 }
         }
 
-        private String loadGeoJsonFromAsset(String filename) {
+        private Map<String, String> loadAllGeoJsonFromAssets() {
+                Map<String, String> geoJsonMap = new HashMap<>();
+
                 try {
-                        InputStream is = getAssets().open(filename);
-                        int size = is.available();
-                        byte[] buffer = new byte[size];
-                        is.read(buffer);
-                        is.close();
-                        return new String(buffer, StandardCharsets.UTF_8);
+                        String[] fileList = getAssets().list(""); // List all files in the assets directory
+                        if (fileList != null) {
+                                for (String filename : fileList) {
+                                        if (filename.endsWith(".geojson")) { // Check if the file is a GeoJSON file
+                                                InputStream is = getAssets().open(filename);
+                                                int size = is.available();
+                                                byte[] buffer = new byte[size];
+                                                is.read(buffer);
+                                                is.close();
+                                                String geoJsonData = new String(buffer, "UTF-8");
+                                                geoJsonMap.put(filename.replace(".geojson", ""), geoJsonData); // Use the filename without extension as the key
+                                        }
+                                }
+                        }
                 } catch (IOException ex) {
                         ex.printStackTrace();
-                        return null;
                 }
+
+                return geoJsonMap;
         }
-
-
-
-
 }
