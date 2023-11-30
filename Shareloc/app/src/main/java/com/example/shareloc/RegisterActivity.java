@@ -60,7 +60,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void initializeUserData(String userId, String email) {
         User newUser = new User(email, "");
-        newUser.setCountriesVisited(new ArrayList<>());
+        newUser.setCountriesVisited(new HashMap<>());
         newUser.setAchievements(new HashMap<>());
 
         apiManager.createUser(userId, newUser);

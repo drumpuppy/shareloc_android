@@ -52,13 +52,18 @@ public class UserProfileActivity extends BaseActivity {
                     if (user != null) {
                         binding.editTextNickname.setText(user.getNickname());
 
-                        List<String> countriesVisited = user.getCountriesVisited();
+                        Map<String, Boolean> countriesVisited = user.getCountriesVisited();
                         if (countriesVisited != null && !countriesVisited.isEmpty()) {
-                            String countries = TextUtils.join(", ", countriesVisited);
-                            binding.textViewCountriesVisited.setText(countries);
+                            StringBuilder countriesVisitedText = new StringBuilder();
+                            for (Map.Entry<String, Boolean> entry : countriesVisited.entrySet()) {
+                                countriesVisitedText.append(entry.getKey())
+                                        .append("; ");
+                            }
+                            binding.textViewAchievements.setText(countriesVisitedText.toString());
                         } else {
-                            binding.textViewCountriesVisited.setText(R.string.none);
+                            binding.textViewAchievements.setText(R.string.none);
                         }
+
 
                         Map<String, Boolean> achievements = user.getAchievements();
                         if (achievements != null && !achievements.isEmpty()) {
