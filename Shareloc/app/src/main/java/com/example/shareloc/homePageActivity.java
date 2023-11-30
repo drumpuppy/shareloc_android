@@ -119,17 +119,17 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                 Map<String, String> geoJsonMap = new HashMap<>();
 
                 try {
-                        String[] fileList = getAssets().list(""); // List all files in the assets directory
+                        String[] fileList = getAssets().list("");
                         if (fileList != null) {
                                 for (String filename : fileList) {
-                                        if (filename.endsWith(".geojson")) { // Check if the file is a GeoJSON file
+                                        if (filename.endsWith(".geojson")) {
                                                 InputStream is = getAssets().open(filename);
                                                 int size = is.available();
                                                 byte[] buffer = new byte[size];
                                                 is.read(buffer);
                                                 is.close();
                                                 String geoJsonData = new String(buffer, "UTF-8");
-                                                geoJsonMap.put(filename.replace(".geojson", ""), geoJsonData); // Use the filename without extension as the key
+                                                geoJsonMap.put(filename.replace(".geojson", ""), geoJsonData);
                                         }
                                 }
                         }
