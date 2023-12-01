@@ -98,9 +98,22 @@ public class UserProfileActivity extends BaseActivity {
             String nickname = binding.editTextNickname.getText().toString();
 
             Log.d("UserProfileActivity", "Updating user: " + userId + " with nickname: " + nickname);
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    User user = snapshot.getValue(User.class);
+                    if (user != null) {
+                        user.setNickname(nickname);
+                    }
+                }
 
-            User updatedUser = new User(currentUser.getEmail(), nickname);
-            apiManager.updateUser(userId, updatedUser);
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.w("UserProfileActivity", "loadUserData:onCancelled", error.toException());
+                }
+            });
+
         } else {
             Log.w("UserProfileActivity", "No authenticated user found");
         }
