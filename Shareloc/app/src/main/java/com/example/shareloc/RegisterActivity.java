@@ -2,14 +2,13 @@ package com.example.shareloc;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -25,12 +24,17 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
-        apiManager = new ApiManager(); // Initialize ApiManager
+        apiManager = new ApiManager();
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         Button registerButton = findViewById(R.id.registerButton);
 
-        registerButton.setOnClickListener(view -> performRegistration());
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                performRegistration();
+            }
+        });
     }
 
     private void performRegistration() {
@@ -38,7 +42,19 @@ public class RegisterActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Email and password must not be empty", Toast.LENGTH_SHORT).show();
+            // Afficher un message d'erreur si un champ (email ou mot de passe) est vide
+            if (email.isEmpty()) {
+                emailEditText.setError("Email is required");
+            }
+            if (password.isEmpty()) {
+                passwordEditText.setError("Password is required");
+            }
+            return;
+        }
+
+        if (password.length() < 6) {
+            // Afficher un message d'erreur si le mot de passe a moins de 6 caractères
+            passwordEditText.setError("Password must be at least 6 characters");
             return;
         }
 
