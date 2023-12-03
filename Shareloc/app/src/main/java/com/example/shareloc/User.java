@@ -24,7 +24,7 @@ public class User {
 
     private Map<String, Boolean> createDefaultAchievements() {
         Map<String, Boolean> achievements = new HashMap<>();
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 20; i++) {
             achievements.put("achievement_" + i, false);
         }
         return achievements;
