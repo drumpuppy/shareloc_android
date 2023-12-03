@@ -10,11 +10,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import androidx.annotation.NonNull;
 
-import android.text.TextUtils;
 import android.util.Log;
 import android.os.Bundle;
+import android.widget.Button;
 
-import java.util.List;
 import java.util.Map;
 
 
@@ -26,12 +25,16 @@ public class UserProfileActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         binding = ActivityUserProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         apiManager = new ApiManager();
         loadUserData();
         binding.buttonSaveChanges.setOnClickListener(v -> updateUserData());
 
+        Button logoutButton = findViewById(R.id.buttonLogout);
+        logoutButton.setOnClickListener(view -> logout());
     }
 
     @Override
@@ -56,12 +59,17 @@ public class UserProfileActivity extends BaseActivity {
                         if (countriesVisited != null && !countriesVisited.isEmpty()) {
                             StringBuilder countriesVisitedText = new StringBuilder();
                             for (Map.Entry<String, Boolean> entry : countriesVisited.entrySet()) {
-                                countriesVisitedText.append(entry.getKey())
-                                        .append("; ");
+                                if (entry.getValue()) { // Check if the country was visited
+                                    countriesVisitedText.append(entry.getKey()).append("; ");
+                                }
                             }
-                            binding.textViewAchievements.setText(countriesVisitedText.toString());
+                            if (countriesVisitedText.length() > 0) {
+                                binding.textViewCountriesVisited.setText(countriesVisitedText.toString());
+                            } else {
+                                binding.textViewCountriesVisited.setText(R.string.none);
+                            }
                         } else {
-                            binding.textViewAchievements.setText(R.string.none);
+                            binding.textViewCountriesVisited.setText(R.string.none);
                         }
 
 
@@ -106,6 +114,7 @@ public class UserProfileActivity extends BaseActivity {
                     if (user != null) {
                         user.setNickname(nickname);
                     }
+                    apiManager.updateUser(userId, user);
                 }
 
                 @Override

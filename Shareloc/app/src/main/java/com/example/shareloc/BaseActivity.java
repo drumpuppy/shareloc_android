@@ -12,6 +12,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.Objects;
+
 
 public abstract class BaseActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     protected DrawerLayout drawer;
@@ -29,6 +31,10 @@ public abstract class BaseActivity extends AppCompatActivity implements Navigati
         NavigationView navigationView = findViewById(R.id.nav_view);
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(this);
+        }
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -56,7 +62,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Navigati
 
     protected abstract int getLayoutId();
 
-    private void logout() {
+    void logout() {
         mAuth.signOut();
         redirectToLogin();
     }
