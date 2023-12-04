@@ -2,6 +2,8 @@ package com.example.shareloc;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class User {
     private String username;
@@ -9,11 +11,14 @@ public class User {
     private Map<String, Boolean> countriesVisited;
     private Map<String, Boolean> achievements;
 
+    private List<String> friends;
+
     public User() {
         this.username = "";
         this.nickname = "";
         this.countriesVisited = createDefaultCountries();
         this.achievements = createDefaultAchievements();
+        this.friends = new ArrayList<>();
     }
     public User(String username,String nickname) {
         this.username = username;
@@ -24,16 +29,9 @@ public class User {
 
     private Map<String, Boolean> createDefaultAchievements() {
         Map<String, Boolean> achievements = new HashMap<>();
-        achievements.put("Mon petit poney : trouve ton premier pays", false);
-        achievements.put("Randoneur: découvre 5 pays", false);
-        achievements.put("Expert: trouve 40 pays", false);
-        achievements.put("God Save the Queen: trouve tous les pays du CommonWealth", false);
-        achievements.put("Mister WorldWide: découvre le monde entier !", false);
-        achievements.put("I go solo: fait toi un ami",false);
-        achievements.put("Où es-tu ?: découvre la carte d'un(e) ami(e)", false);
-        achievements.put("Stalker: découvre la carte de 5 amis", false);
-        achievements.put("Holy Moly: va au Vatican", false);
-
+        for (int i = 1; i <= 20; i++) {
+            achievements.put("achievement_" + i, false);
+        }
         return achievements;
     }
 
@@ -109,5 +107,13 @@ public class User {
 
     public void setAchievements(Map<String, Boolean> achievements) {
         this.achievements = achievements;
+    }
+
+    public List<String> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(List<String> friends) {
+        this.friends = friends;
     }
 }
