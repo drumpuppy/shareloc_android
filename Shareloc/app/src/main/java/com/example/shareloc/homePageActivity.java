@@ -1,14 +1,24 @@
 package com.example.shareloc;
 
+import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Geocoder;
+
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -22,29 +32,32 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.maps.android.data.geojson.GeoJsonLayer;
 import com.google.maps.android.data.geojson.GeoJsonPolygonStyle;
 
-import android.Manifest;
-import android.util.Log;
 
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 
 public class homePageActivity extends BaseActivity implements OnMapReadyCallback {
         private GoogleMap mMap;
         private User currentUser;
         private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+        private FusedLocationProviderClient fusedLocationClient;
+        private LocationCallback locationCallback;
 
+        //génère la map google api
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
                 setupMapFragment();
+                fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+                setupLocationCallback();
         }
-
         private void setupMapFragment() {
                 SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.map);
@@ -52,7 +65,6 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                         mapFragment.getMapAsync(this);
                 }
         }
-
         private void enableLocationFeatures() {
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                         != PackageManager.PERMISSION_GRANTED) {
@@ -77,12 +89,10 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                         }
                 }
         }
-
         @Override
         protected int getLayoutId() {
                 return R.layout.home_page;
         }
-
         @Override
         public void onMapReady(@NonNull GoogleMap googleMap) {
                 mMap = googleMap;
@@ -99,6 +109,8 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                 loadCurrentUserAndSetupMap();
         }
 
+
+        // load countries layout
         private void loadCurrentUserAndSetupMap() {
                 FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                 if (firebaseUser != null) {
@@ -122,7 +134,6 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                         Log.w("homePageActivity", "FirebaseUser is null");
                 }
         }
-
         private void setupCountryOverlays() {
                 if (currentUser != null && currentUser.getCountriesVisited() != null) {
                         Map<String, Boolean> visitedCountries = currentUser.getCountriesVisited();
@@ -137,24 +148,22 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                         }
                 }
         }
-
-
-
         private String loadGeoJsonFromAsset(String filename) {
                 try {
                         InputStream is = getAssets().open(filename);
                         int size = is.available();
                         byte[] buffer = new byte[size];
-                        is.read(buffer);
+                        int bytesRead = is.read(buffer);
+                        if (bytesRead != size) {
+                                Log.w("homePageActivity", "load Geo buffer size !=");
+                        }
                         is.close();
-                        return new String(buffer, "UTF-8");
+                        return new String(buffer, StandardCharsets.UTF_8);
                 } catch (IOException ex) {
                         Log.e("homePageActivity", "Error reading GeoJSON file: " + filename, ex);
                         return null;
                 }
         }
-
-
         private void addGeoJsonLayerToMap(GoogleMap map, String geoJsonData, String countryName) {
                 try {
                         JSONObject geoJson = new JSONObject(geoJsonData);
@@ -166,6 +175,101 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                         layer.addLayerToMap();
                 } catch (Exception e) {
                         Log.e("homePageActivity", "Problem reading GeoJSON file for country: " + countryName, e);
+                }
+        }
+
+
+
+        // find where you are
+        private void setupLocationCallback() {
+                LocationRequest locationRequest = LocationRequest.create();
+                locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                locationRequest.setInterval(10000); // Update location every 10 seconds
+
+                locationCallback = new LocationCallback() {
+                        @Override
+                        public void onLocationResult(@NonNull LocationResult locationResult) {
+                                for (Location location : locationResult.getLocations()) {
+                                        String countryName = getCountryName(location.getLatitude(), location.getLongitude());
+                                        updateCountryVisited(countryName);
+                                }
+                        }
+                };
+                startLocationUpdates(locationRequest);
+        }
+        private void startLocationUpdates(LocationRequest locationRequest) {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+                        return;
+                }
+                fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        }
+        private String mapCountryNameToFileName(String countryName) {
+                Map<String, String> countryNameToFileMap = new HashMap<>();
+                countryNameToFileMap.put("Albania", "albania");
+                countryNameToFileMap.put("Austria", "austria");
+                countryNameToFileMap.put("Belarus", "belarus");
+                countryNameToFileMap.put("Belgium", "belgium");
+                countryNameToFileMap.put("Bosnia and Herzegovina", "bosnia-and-herzegovina");
+                countryNameToFileMap.put("Bulgaria", "bulgaria");
+                countryNameToFileMap.put("Croatia", "croatia");
+                countryNameToFileMap.put("Cyprus", "cyprus");
+                countryNameToFileMap.put("Czech Republic", "czech-republic");
+                countryNameToFileMap.put("Denmark", "denmark");
+                countryNameToFileMap.put("Estonia", "estonia");
+                countryNameToFileMap.put("Finland", "finland");
+                countryNameToFileMap.put("France", "france");
+                countryNameToFileMap.put("Germany", "germany");
+                countryNameToFileMap.put("Greece", "greece");
+                countryNameToFileMap.put("Hungary", "hungary");
+                countryNameToFileMap.put("Ireland", "ireland");
+                countryNameToFileMap.put("Italy", "italy");
+                countryNameToFileMap.put("Latvia", "latvia");
+                countryNameToFileMap.put("Lithuania", "lithuania");
+                countryNameToFileMap.put("Luxembourg", "luxembourg");
+                countryNameToFileMap.put("Malta", "malta");
+                countryNameToFileMap.put("Moldova", "moldova");
+                countryNameToFileMap.put("Montenegro", "montenegro");
+                countryNameToFileMap.put("Netherlands", "netherlands");
+                countryNameToFileMap.put("Norway", "norway");
+                countryNameToFileMap.put("Poland", "poland");
+                countryNameToFileMap.put("Portugal", "portugal");
+                countryNameToFileMap.put("North Macedonia", "republic-of-north-macedonia");
+                countryNameToFileMap.put("Romania", "romania");
+                countryNameToFileMap.put("Serbia", "serbia");
+                countryNameToFileMap.put("Slovakia", "slovakia");
+                countryNameToFileMap.put("Slovenia", "slovenia");
+                countryNameToFileMap.put("Spain", "spain");
+                countryNameToFileMap.put("Sweden", "sweden");
+                countryNameToFileMap.put("Switzerland", "switzerland");
+                countryNameToFileMap.put("Ukraine", "ukraine");
+                countryNameToFileMap.put("United Kingdom", "united-kingdom");
+
+                String fileName = countryNameToFileMap.get(countryName);
+                if (fileName != null) {
+                        return fileName + ".geojson";
+                } else {
+                        Log.w("homePageActivity", "Country name mapping not found for: " + countryName);
+                        return null;
+                }
+        }
+        private String getCountryName(double latitude, double longitude) {
+                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                try {
+                        String countryName = Objects.requireNonNull(geocoder.getFromLocation(latitude, longitude, 1)).get(0).getCountryName();
+                        return mapCountryNameToFileName(countryName);
+                } catch (Exception e) {
+                        Log.e("homePageActivity", "Geocoder failed", e);
+                        return null;
+                }
+        }
+        private void updateCountryVisited(String countryName) {
+                if (countryName == null) return;
+
+                FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                if (firebaseUser != null) {
+                        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(firebaseUser.getUid());
+                        userRef.child("countriesVisited").child(countryName.toLowerCase()).setValue(true);
                 }
         }
 }
