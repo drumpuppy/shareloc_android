@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,6 +29,7 @@ public class RegisterActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         Button registerButton = findViewById(R.id.registerButton);
+        TextView registerLink = findViewById(R.id.registerLink);
 
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -35,6 +37,8 @@ public class RegisterActivity extends AppCompatActivity {
                 performRegistration();
             }
         });
+
+        registerLink.setOnClickListener(view -> startActivity(new Intent(RegisterActivity.this, LoginActivity.class)));
     }
 
     private void performRegistration() {
