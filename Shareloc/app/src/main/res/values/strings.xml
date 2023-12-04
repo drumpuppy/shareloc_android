@@ -3,7 +3,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="map_id">5285f8b09606d67e</string>
-    <string name="no_account_register_here">No account? Register here</string>
+    <string name="no_account_register_here">Pas de compte ? Incris toi !</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="email">Email</string>
@@ -16,4 +16,6 @@
     <string name="home">Home</string>
     <string name="amis">Amis</string>
     <string name="user_profile">User Profile</string>
+    <string name="je_me_connecte_mon_compte">Je me connecte à mon compte :</string>
+    <string name="shareloc">Shareloc</string>
 </resources>
