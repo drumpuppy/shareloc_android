@@ -29,7 +29,7 @@ public class User {
         achievements.put("Expert: trouve 40 pays", false);
         achievements.put("God Save the Queen: trouve tous les pays du CommonWealth", false);
         achievements.put("Mister WorldWide: découvre le monde entier !", false);
-        achievements.put("I go solo: fait toi un ami",false);
+        achievements.put("I go solo: fais toi un ami",false);
         achievements.put("Où es-tu ?: découvre la carte d'un(e) ami(e)", false);
         achievements.put("Stalker: découvre la carte de 5 amis", false);
         achievements.put("Holy Moly: va au Vatican", false);

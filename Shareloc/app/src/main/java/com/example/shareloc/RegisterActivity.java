@@ -46,7 +46,6 @@ public class RegisterActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
-            // Afficher un message d'erreur si un champ (email ou mot de passe) est vide
             if (email.isEmpty()) {
                 emailEditText.setError("Email is required");
             }

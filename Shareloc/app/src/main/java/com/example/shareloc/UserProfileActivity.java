@@ -152,29 +152,42 @@ public class UserProfileActivity extends BaseActivity {
             String achievementDescription = entry.getKey();
             boolean isAchieved = entry.getValue();
 
-            if (isAchieved) {
-                String drawableName = mapDrawableName(achievementDescription);
-                int imageId = getResources().getIdentifier(drawableName, "drawable", getPackageName());
+            String drawableName = mapDrawableName(achievementDescription);
+            int imageId = getResources().getIdentifier(drawableName, "drawable", getPackageName());
 
-                if (imageId != 0) {
-                    ImageView imageView = new ImageView(this);
-                    imageView.setLayoutParams(new LinearLayout.LayoutParams(
-                            convertDpToPixel(24, this),
-                            convertDpToPixel(24, this)
-                    ));
-                    imageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), imageId, null));
-                    achievementsLayout.addView(imageView);
-                } else {
-                    Log.e("UserProfileActivity", "Drawable not found for: " + drawableName);
-                }
-
-                TextView textView = new TextView(this);
-                textView.setText(achievementDescription);
-                textView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                achievementsLayout.addView(textView);
+            ImageView imageView = new ImageView(this);
+            imageView.setLayoutParams(new LinearLayout.LayoutParams(
+                    convertDpToPixel(48, this),
+                    convertDpToPixel(48, this)
+            ));
+            if (imageId != 0) {
+                imageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), imageId, null));
+            } else {
+                Log.e("UserProfileActivity", "Drawable not found for: " + drawableName);
             }
+
+            TextView textView = new TextView(this);
+            textView.setText(achievementDescription);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+
+            int bottomPadding = convertDpToPixel(8, this);
+            layoutParams.setMargins(0, 0, 0, bottomPadding);
+            textView.setLayoutParams(layoutParams);
+
+            float alphaValue = isAchieved ? 1.0f : 0.2f;
+            float betaValue = isAchieved ? 1.0f : 0.5f;
+            imageView.setAlpha(alphaValue);
+            textView.setAlpha(betaValue);
+
+            achievementsLayout.addView(imageView);
+            achievementsLayout.addView(textView);
         }
     }
+
+
 
 
     public static int convertDpToPixel(int dp, Context context) {
@@ -193,7 +206,7 @@ public class UserProfileActivity extends BaseActivity {
                 return "god_save_the_queen";
             case "Mister WorldWide: découvre le monde entier !":
                 return "mister_worldwide";
-            case "I go solo: fait toi un ami":
+            case "I go solo: fais toi un ami":
                 return "i_go_solo";
             case "Où es-tu ?: découvre la carte d'un(e) ami(e)":
                 return "where_are_you";

@@ -65,21 +65,19 @@
                     android:id="@+id/textViewCountriesVisitedLabel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="84dp"
                     android:text="@string/countries_visited"
                     android:textAppearance="?attr/textAppearanceSubtitle1"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/editTextNickname"
-                    app:layout_constraintVertical_bias="0.481" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/editTextNickname" />
 
                 <TextView
                     android:id="@+id/textViewCountriesVisited"
                     android:layout_width="409dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="1dp"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="8dp"
                     android:padding="8dp"
                     android:text="@string/none"
                     android:textAppearance="?attr/textAppearanceBody1"
@@ -100,13 +98,15 @@
 
                 <LinearLayout
                     android:id="@+id/achievementsLayout"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:orientation="vertical"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewAchievementsLabel"
-                    tools:layout_editor_absoluteX="-6dp">
-                </LinearLayout>
+                    android:gravity="center"
+                    android:padding="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAchievementsLabel"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </ScrollView>

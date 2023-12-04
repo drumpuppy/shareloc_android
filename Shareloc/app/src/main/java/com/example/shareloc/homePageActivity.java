@@ -8,6 +8,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -263,13 +264,40 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                         return null;
                 }
         }
-        private void updateCountryVisited(String countryName) {
-                if (countryName == null) return;
 
+        private void updateCountryVisited(String countryFileName) {
+                if (countryFileName == null) return;
+
+                String firebaseKey = countryFileName.replace(".geojson", "").replaceAll("[.#$\\[\\]]", "");
                 FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
                 if (firebaseUser != null) {
                         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(firebaseUser.getUid());
-                        userRef.child("countriesVisited").child(countryName.toLowerCase()).setValue(true);
+                        userRef.child("countriesVisited").child(firebaseKey).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        if (!dataSnapshot.exists() || dataSnapshot.getValue(Boolean.class) == Boolean.FALSE) {
+                                                userRef.child("countriesVisited").child(firebaseKey).setValue(true);
+                                                refreshMap();
+                                                Toast.makeText(homePageActivity.this, "Vous venez de découvrir : " + firebaseKey + "!", Toast.LENGTH_LONG).show();
+                                        }
+                                }
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+                                        Log.w("homePageActivity", "Database error: " + databaseError.toException());
+                                }
+                        });
                 }
         }
+
+        private void refreshMap() {
+                if (mMap == null) {
+                        Log.e("homePageActivity", "Map is not ready to be refreshed");
+                        return;
+                }
+                mMap.clear();
+                loadCurrentUserAndSetupMap();
+        }
+
+
 }
