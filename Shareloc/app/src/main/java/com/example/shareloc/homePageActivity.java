@@ -207,6 +207,8 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
         }
         private String mapCountryNameToFileName(String countryName) {
                 Map<String, String> countryNameToFileMap = new HashMap<>();
+
+                //europe
                 countryNameToFileMap.put("Albania", "albania");
                 countryNameToFileMap.put("Austria", "austria");
                 countryNameToFileMap.put("Belarus", "belarus");
@@ -245,6 +247,145 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                 countryNameToFileMap.put("Switzerland", "switzerland");
                 countryNameToFileMap.put("Ukraine", "ukraine");
                 countryNameToFileMap.put("United Kingdom", "united-kingdom");
+                countryNameToFileMap.put("Russia", "russia");
+                countryNameToFileMap.put("Iceland", "iceland");
+
+
+                // africa
+                countryNameToFileMap.put("Algeria", "algeria");
+                countryNameToFileMap.put("Angola", "angola");
+                countryNameToFileMap.put("Benin", "benin");
+                countryNameToFileMap.put("Botswana", "botswana");
+                countryNameToFileMap.put("Burkina Faso", "burkina-faso");
+                countryNameToFileMap.put("Burundi", "burundi");
+                countryNameToFileMap.put("Cameroon", "cameroon");
+                countryNameToFileMap.put("Chad", "chad");
+                countryNameToFileMap.put("Congo", "congo");
+                countryNameToFileMap.put("Central African Republic", "central-african-republic");
+                countryNameToFileMap.put("Côte d'Ivoire", "cote-divoire");
+                countryNameToFileMap.put("Djibouti", "djibouti");
+                countryNameToFileMap.put("Egypt", "egypt");
+                countryNameToFileMap.put("Equatorial Guinea", "equatorial");
+                countryNameToFileMap.put("Eritrea", "eritrea");
+                countryNameToFileMap.put("Ethiopia", "ethiopia");
+                countryNameToFileMap.put("Gabon", "gabon");
+                countryNameToFileMap.put("Gambia", "gambia");
+                countryNameToFileMap.put("Ghana", "ghana");
+                countryNameToFileMap.put("Guinea-Bissau", "guinea-bissau");
+                countryNameToFileMap.put("Guinea", "guinea");
+                countryNameToFileMap.put("Kenya", "kenya");
+                countryNameToFileMap.put("Lesotho", "lesotho");
+                countryNameToFileMap.put("Liberia", "liberia");
+                countryNameToFileMap.put("Libya", "libyan-arab-jamahiriya");
+                countryNameToFileMap.put("Madagascar", "madagascar");
+                countryNameToFileMap.put("Malawi", "malawi");
+                countryNameToFileMap.put("Mali", "mali");
+                countryNameToFileMap.put("Mauritania", "mauritania");
+                countryNameToFileMap.put("Morocco", "morocco");
+                countryNameToFileMap.put("Mozambique", "mozambique");
+                countryNameToFileMap.put("Namibia", "namibia");
+                countryNameToFileMap.put("Niger", "niger");
+                countryNameToFileMap.put("Nigeria", "nigeria");
+                countryNameToFileMap.put("Rwanda", "rwanda");
+                countryNameToFileMap.put("Senegal", "senegal");
+                countryNameToFileMap.put("Sierra Leone", "sierra-leone");
+                countryNameToFileMap.put("Somalia", "somalia");
+                countryNameToFileMap.put("South Africa", "south-africa");
+                countryNameToFileMap.put("South Sudan", "south-sudan");
+                countryNameToFileMap.put("Sudan", "sudan");
+                countryNameToFileMap.put("Swaziland", "swaziland");
+                countryNameToFileMap.put("Tanzania", "tanzania");
+                countryNameToFileMap.put("Togo", "togo");
+                countryNameToFileMap.put("Tunisia", "tunisia");
+                countryNameToFileMap.put("Uganda", "uganda");
+                countryNameToFileMap.put("Western Sahara", "western-sahara");
+                countryNameToFileMap.put("Zambia", "zambia");
+                countryNameToFileMap.put("Republic Democratique du congo", "democratic-republic-of-the-congo");
+                countryNameToFileMap.put("Zimbabwe", "zimbabwe");
+
+                //America
+                countryNameToFileMap.put("Argentina", "argentina");
+                countryNameToFileMap.put("Bolivia", "bolivia");
+                countryNameToFileMap.put("Brazil", "brazil");
+                countryNameToFileMap.put("Canada", "canada");
+                countryNameToFileMap.put("Chile", "chile");
+                countryNameToFileMap.put("Colombia", "colombia");
+                countryNameToFileMap.put("Costa Rica", "costa-rica");
+                countryNameToFileMap.put("Cuba", "cuba");
+                countryNameToFileMap.put("Ecuador", "ecuador");
+                countryNameToFileMap.put("El Salvador", "el-salvador");
+                countryNameToFileMap.put("Greenland", "greenland");
+                countryNameToFileMap.put("Guatemala", "guatemala");
+                countryNameToFileMap.put("Guyana", "guyana");
+                countryNameToFileMap.put("Haiti", "haiti");
+                countryNameToFileMap.put("Honduras", "honduras");
+                countryNameToFileMap.put("Jamaica", "jamaica");
+                countryNameToFileMap.put("Mexico", "mexico");
+                countryNameToFileMap.put("Nicaragua", "nicaragua");
+                countryNameToFileMap.put("Panama", "panama");
+                countryNameToFileMap.put("Paraguay", "paraguay");
+                countryNameToFileMap.put("Peru", "peru");
+                countryNameToFileMap.put("Puerto Rico", "puerto-rico");
+                countryNameToFileMap.put("Suriname", "suriname");
+                countryNameToFileMap.put("United States", "united-states");
+                countryNameToFileMap.put("Uruguay", "uruguay");
+                countryNameToFileMap.put("Venezuela", "venezuela");
+
+                //Asia
+                countryNameToFileMap.put("Afghanistan", "afghanistan");
+                countryNameToFileMap.put("Armenia", "armenia");
+                countryNameToFileMap.put("Azerbaijan", "azerbaijan");
+                countryNameToFileMap.put("Bangladesh", "bangladesh");
+                countryNameToFileMap.put("Bhutan", "asia/bhutan");
+                countryNameToFileMap.put("Brunei Darussalam", "brunei-darussalam");
+                countryNameToFileMap.put("Cambodia", "cambodia");
+                countryNameToFileMap.put("China", "china");
+                countryNameToFileMap.put("Democratic People's Republic of Korea", "democratic-peoples-republic-of-korea");
+                countryNameToFileMap.put("Georgia", "georgia");
+                countryNameToFileMap.put("India", "india");
+                countryNameToFileMap.put("Indonesia", "indonesia");
+                countryNameToFileMap.put("Iran", "iran");
+                countryNameToFileMap.put("Iraq", "iraq");
+                countryNameToFileMap.put("Israel", "israel");
+                countryNameToFileMap.put("Japan", "japan");
+                countryNameToFileMap.put("Jordan", "jordan");
+                countryNameToFileMap.put("Kazakhstan", "kazakhstan");
+                countryNameToFileMap.put("Kuwait", "kuwait");
+                countryNameToFileMap.put("Kyrgyzstan", "kyrgyzstan");
+                countryNameToFileMap.put("Lao People's Democratic Republic", "lao-peoples-democratic-republic");
+                countryNameToFileMap.put("Lebanon", "lebanon");
+                countryNameToFileMap.put("Malaysia", "malaysia");
+                countryNameToFileMap.put("Mongolia", "mongolia");
+                countryNameToFileMap.put("Myanmar", "myanmar");
+                countryNameToFileMap.put("Nepal", "nepal");
+                countryNameToFileMap.put("Oman", "oman");
+                countryNameToFileMap.put("Pakistan", "pakistan");
+                countryNameToFileMap.put("Palestinian", "palestinian");
+                countryNameToFileMap.put("Philippines", "philippines");
+                countryNameToFileMap.put("Qatar", "qatar");
+                countryNameToFileMap.put("Saudi Arabia", "saudi-arabia");
+                countryNameToFileMap.put("South Korea", "south-korea");
+                countryNameToFileMap.put("Sri Lanka", "sri-lanka");
+                countryNameToFileMap.put("Syrian Arab Republic", "syrian-arab-republic");
+                countryNameToFileMap.put("Taiwan", "asia/taiwan");
+                countryNameToFileMap.put("Tajikistan", "tajikistan");
+                countryNameToFileMap.put("Thailand", "thailand");
+                countryNameToFileMap.put("Turkey", "turkey");
+                countryNameToFileMap.put("Turkmenistan", "turkmenistan");
+                countryNameToFileMap.put("United Arab Emirates", "united-arab-emirates");
+                countryNameToFileMap.put("Uzbekistan", "uzbekistan");
+                countryNameToFileMap.put("Viet Nam", "viet-nam");
+                countryNameToFileMap.put("Yemen", "yemen");
+
+                // Oceanie
+                countryNameToFileMap.put("Australia", "australia");
+                countryNameToFileMap.put("New Zealand", "new-zealand");
+                countryNameToFileMap.put("Vanuatu", "vanuatu");
+                countryNameToFileMap.put("Fiji", "fiji");
+                countryNameToFileMap.put("Papua New Guinea", "papua-new-guinea");
+                countryNameToFileMap.put("New Caledonia", "new-caledonia");
+                countryNameToFileMap.put("Solomon Islands", "solomon-islands");
+
 
                 String fileName = countryNameToFileMap.get(countryName);
                 if (fileName != null) {
