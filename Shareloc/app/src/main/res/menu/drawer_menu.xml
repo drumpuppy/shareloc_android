@@ -1,15 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
         android:id="@+id/nav_home"
-        android:title="@string/home" />
+        android:title="@string/home"
+        android:icon="@drawable/world"
+        android:background="@color/menu_item_bg_color"
+        style="@style/MenuItemStyle"/>
+
     <item
         android:id="@+id/nav_amis"
-        android:title="@string/amis" />
+        android:title="@string/amis"
+        android:icon="@drawable/friends"
+        android:background="@color/menu_item_bg_color"
+        style="@style/MenuItemStyle"/>
+
+
     <item
         android:id="@+id/nav_user"
-        android:title="@string/user_profile" />
+        android:title="@string/user_profile"
+        android:icon="@drawable/user"
+        android:background="@color/menu_item_bg_color"
+        style="@style/MenuItemStyle"/>
+
     <item
         android:id="@+id/nav_logout"
-        android:title="@string/logout" />
+        android:title="@string/logout"
+        android:icon="@drawable/logout"
+        android:background="@color/menu_item_bg_color"
+        style="@style/MenuItemStyle"/>
+
+
 </menu>
