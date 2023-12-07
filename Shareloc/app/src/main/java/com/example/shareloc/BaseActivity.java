@@ -78,6 +78,8 @@ public abstract class BaseActivity extends AppCompatActivity implements Navigati
 
         if (id == R.id.nav_home && !(this instanceof homePageActivity)) {
             startActivity(new Intent(this, homePageActivity.class));
+        } if (id == R.id.nav_france && !(this instanceof FranceMapActivity)) {
+            startActivity(new Intent(this, FranceMapActivity.class));
         } else if (id == R.id.nav_amis && !(this instanceof AmisActivity)) {
             startActivity(new Intent(this, AmisActivity.class));
         } else if (id == R.id.nav_user && !(this instanceof UserProfileActivity)) {

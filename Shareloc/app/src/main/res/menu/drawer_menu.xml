@@ -4,6 +4,9 @@
         android:id="@+id/nav_home"
         android:title="@string/home" />
     <item
+        android:id="@+id/nav_france"
+        android:title="@string/challenge" />
+    <item
         android:id="@+id/nav_amis"
         android:title="@string/amis" />
     <item

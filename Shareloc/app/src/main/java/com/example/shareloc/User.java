@@ -1,6 +1,10 @@
 package com.example.shareloc;
 
+import android.location.Location;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class User {
@@ -8,18 +12,25 @@ public class User {
     private String nickname;
     private Map<String, Boolean> countriesVisited;
     private Map<String, Boolean> achievements;
+    private List<Location> positions_found;
 
     public User() {
         this.username = "";
         this.nickname = "";
         this.countriesVisited = createDefaultCountries();
         this.achievements = createDefaultAchievements();
+        this.positions_found = createDefaultPostionFound();
     }
     public User(String username,String nickname) {
         this.username = username;
         this.nickname = nickname;
         this.countriesVisited = createDefaultCountries();
         this.achievements = createDefaultAchievements();
+        this.positions_found = createDefaultPostionFound();
+    }
+
+    private List<Location> createDefaultPostionFound(){
+        return new ArrayList<>();
     }
 
     private Map<String, Boolean> createDefaultAchievements() {
