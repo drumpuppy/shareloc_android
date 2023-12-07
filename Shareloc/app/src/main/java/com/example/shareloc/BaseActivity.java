@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
@@ -29,6 +30,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Navigati
 
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setBackgroundColor(ContextCompat.getColor(this, R.color.violet_clair));
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(this);
         }
