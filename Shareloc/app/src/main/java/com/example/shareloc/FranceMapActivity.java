@@ -2,7 +2,6 @@ package com.example.shareloc;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -26,7 +25,6 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -35,18 +33,21 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.maps.android.data.geojson.GeoJsonLayer;
-import com.google.maps.android.data.geojson.GeoJsonFeature;
 import com.google.maps.android.data.geojson.GeoJsonPolygonStyle;
 
+
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
-import org.json.JSONObject;
 
 
 public class FranceMapActivity extends BaseActivity implements OnMapReadyCallback {
@@ -124,39 +125,24 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(franceCenter, 5));
 
         LatLngBounds franceBounds = new LatLngBounds(
-                new LatLng(42.331, -5.141), // Southwest corner of France
-                new LatLng(51.089, 8.233)   // Northeast corner of France
+                new LatLng(44.331, -4.141), // Southwest corner of France
+                new LatLng(51.089, 7.233)   // Northeast corner of France
         );
 
         mMap.setLatLngBoundsForCameraTarget(franceBounds);
 
         // Set minimum and maximum zoom
-        mMap.setMinZoomPreference(5.0f);
+        mMap.setMinZoomPreference(5.6f);
         mMap.setMaxZoomPreference(15.0f);
 
-        try {
-            boolean success = mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.my_custom_style));
-            if (!success) {
-                Log.e("MapsActivity", "Style parsing failed.");
+        List<String> country_list = Arrays.asList("luxembourg","germany", "ireland", "belgium", "united-kingdom", "italy", "spain","portugal","switzerland", "netherlands", "austria");
+        for (int i = 0; i < country_list.size(); i++) {
+            String geoJsonData = loadGeoJsonFromAsset(country_list.get(i) + ".geojson");
+            if (geoJsonData != null) {
+                addGeoJsonLayerToMap(mMap, geoJsonData, country_list.get(i));
             }
-        } catch (Resources.NotFoundException e) {
-            Log.e("MapsActivity", "Can't find style. Error: ", e);
         }
 
-
-        try {
-            InputStream inputStream = getAssets().open("challenge/france.geojson");
-            GeoJsonLayer franceLayer = new GeoJsonLayer(mMap, new JSONObject(convertStreamToString(inputStream)));
-            franceLayer.addLayerToMap();
-
-            for (GeoJsonFeature feature : franceLayer.getFeatures()) {
-                GeoJsonPolygonStyle style = new GeoJsonPolygonStyle();
-                style.setFillColor(Color.GRAY);
-                feature.setPolygonStyle(style);
-            }
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -253,9 +239,35 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         }
     }
 
-    private String convertStreamToString(InputStream is) {
-        Scanner scanner = new Scanner(is).useDelimiter("\\A");
-        return scanner.hasNext() ? scanner.next() : "";
+    private String loadGeoJsonFromAsset(String filename) {
+        try {
+            InputStream is = getAssets().open(filename);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            int bytesRead = is.read(buffer);
+            if (bytesRead != size) {
+                Log.w("homePageActivity", "load Geo buffer size !=");
+            }
+            is.close();
+            return new String(buffer, StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            Log.e("homePageActivity", "Error reading GeoJSON file: " + filename, ex);
+            return null;
+        }
+    }
+
+    private void addGeoJsonLayerToMap(GoogleMap map, String geoJsonData, String countryName) {
+        try {
+            JSONObject geoJson = new JSONObject(geoJsonData);
+            GeoJsonLayer layer = new GeoJsonLayer(map, geoJson);
+            GeoJsonPolygonStyle style = layer.getDefaultPolygonStyle();
+            style.setFillColor(Color.BLACK);
+            style.setStrokeColor(Color.BLACK);
+            style.setStrokeWidth(2f);
+            layer.addLayerToMap();
+        } catch (Exception e) {
+            Log.e("homePageActivity", "Problem reading GeoJSON file for country: " + countryName, e);
+        }
     }
 
     private void startLocationUpdates(LocationRequest locationRequest) {
