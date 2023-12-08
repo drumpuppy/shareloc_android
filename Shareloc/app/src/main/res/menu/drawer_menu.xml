@@ -9,7 +9,11 @@
 
     <item
         android:id="@+id/nav_france"
-        android:title="@string/challenge" />
+        android:title="@string/challenge"
+        android:icon="@drawable/cup"
+        android:background="@color/menu_item_bg_color"
+        style="@style/MenuItemStyle"/>
+
     <item
         android:id="@+id/nav_amis"
         android:title="@string/amis"
