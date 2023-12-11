@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -117,7 +118,21 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         }
     }
 
-
+    private String loadJSONFromRawResource(int resourceId) {
+        String json;
+        try {
+            InputStream is = getResources().openRawResource(resourceId);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
+    }
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
@@ -136,7 +151,15 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         mMap.setMinZoomPreference(5.6f);
         mMap.setMaxZoomPreference(15.0f);
 
-        List<String> country_list = Arrays.asList("luxembourg","germany", "ireland", "belgium", "united-kingdom", "italy", "spain","portugal","switzerland", "netherlands", "austria");
+        // Load the JSON style from raw resource
+        String customMapStyle = loadJSONFromRawResource(R.raw.my_custom_style);
+
+        // Check if the JSON file loaded successfully
+        if (customMapStyle != null) {
+            mMap.setMapStyle(new MapStyleOptions(customMapStyle));
+        }
+
+        List<String> country_list = Arrays.asList("luxembourg", "germany", "ireland", "belgium", "united-kingdom", "italy", "spain", "portugal", "switzerland", "netherlands", "austria");
         for (int i = 0; i < country_list.size(); i++) {
             String geoJsonData = loadGeoJsonFromAsset(country_list.get(i) + ".geojson");
             if (geoJsonData != null) {
@@ -144,27 +167,12 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
             }
         }
 
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
             enableLocationFeatures();
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-        }
-
-        try {
-            InputStream inputStream = getAssets().open("france.geojson");
-            GeoJsonLayer franceLayer = new GeoJsonLayer(mMap, new JSONObject(convertStreamToString(inputStream)));
-            franceLayer.addLayerToMap();
-
-            for (GeoJsonFeature feature : franceLayer.getFeatures()) {
-                GeoJsonPolygonStyle style = new GeoJsonPolygonStyle();
-                style.setFillColor(Color.GRAY);
-                feature.setPolygonStyle(style);
-            }
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
         }
 
         visibilityCircle = mMap.addCircle(new CircleOptions()
@@ -175,6 +183,7 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
 
         fetchAndDisplayUserLocations();
     }
+
 
     private String convertStreamToString(InputStream is) {
         Scanner scanner = new Scanner(is).useDelimiter("\\A");

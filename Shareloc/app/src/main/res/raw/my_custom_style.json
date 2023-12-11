@@ -1,6 +1,23 @@
 [
   {
-    "featureType": "administrative",
+    "featureType": "administrative.country",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "stylers": [
+      {
+        "visibility": "simplified"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "geometry",
     "stylers": [
       {
         "visibility": "off"
@@ -16,7 +33,7 @@
     ]
   },
   {
-    "featureType": "landscape",
+    "featureType": "administrative.province",
     "stylers": [
       {
         "visibility": "off"
@@ -24,7 +41,7 @@
     ]
   },
   {
-    "featureType": "poi",
+    "featureType": "landscape.man_made",
     "stylers": [
       {
         "visibility": "off"
@@ -32,8 +49,15 @@
     ]
   },
   {
-    "featureType": "poi",
-    "elementType": "labels.text",
+    "featureType": "landscape.natural.terrain",
+    "stylers": [
+      {
+        "visibility": "simplified"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.attraction",
     "stylers": [
       {
         "visibility": "off"
@@ -49,7 +73,7 @@
     ]
   },
   {
-    "featureType": "road",
+    "featureType": "poi.government",
     "stylers": [
       {
         "visibility": "off"
@@ -57,8 +81,7 @@
     ]
   },
   {
-    "featureType": "road",
-    "elementType": "labels",
+    "featureType": "poi.medical",
     "stylers": [
       {
         "visibility": "off"
@@ -66,8 +89,7 @@
     ]
   },
   {
-    "featureType": "road",
-    "elementType": "labels.icon",
+    "featureType": "poi.place_of_worship",
     "stylers": [
       {
         "visibility": "off"
@@ -75,7 +97,15 @@
     ]
   },
   {
-    "featureType": "road.arterial",
+    "featureType": "poi.school",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.sports_complex",
     "stylers": [
       {
         "visibility": "off"
@@ -84,7 +114,23 @@
   },
   {
     "featureType": "road.highway",
-    "elementType": "labels",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "visibility": "simplified"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway.controlled_access",
+    "stylers": [
+      {
+        "visibility": "simplified"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
     "stylers": [
       {
         "visibility": "off"
@@ -92,7 +138,7 @@
     ]
   },
   {
-    "featureType": "road.local",
+    "featureType": "transit.station",
     "stylers": [
       {
         "visibility": "off"
@@ -100,24 +146,7 @@
     ]
   },
   {
-    "featureType": "transit",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "elementType": "labels.text",
+    "featureType": "transit.station.bus",
     "stylers": [
       {
         "visibility": "off"
