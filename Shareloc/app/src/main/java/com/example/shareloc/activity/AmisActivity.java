@@ -1,4 +1,4 @@
-package com.example.shareloc;
+package com.example.shareloc.activity;
 
 import android.os.Bundle;
 import android.view.View;
@@ -8,6 +8,9 @@ import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
+
+import com.example.shareloc.managers.ApiManager;
+import com.example.shareloc.R;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;

@@ -1,4 +1,4 @@
-package com.example.shareloc;
+package com.example.shareloc.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +7,8 @@ import android.widget.Button;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.GravityCompat;
+
+import com.example.shareloc.R;
 
 public class MainActivity extends BaseActivity {
 

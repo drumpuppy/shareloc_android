@@ -1,6 +1,7 @@
-package com.example.shareloc;
+package com.example.shareloc.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -12,6 +13,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
+import com.example.shareloc.managers.GeoJsonManager;
+import com.example.shareloc.R;
+import com.example.shareloc.Class.UserLocation;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -21,12 +25,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -34,31 +38,23 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.maps.android.data.geojson.GeoJsonFeature;
-import com.google.maps.android.data.geojson.GeoJsonLayer;
-import com.google.maps.android.data.geojson.GeoJsonPolygonStyle;
 
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 
 
 public class FranceMapActivity extends BaseActivity implements OnMapReadyCallback {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 0;
+    private static final float LOCATION_THRESHOLD_DISTANCE = 500;
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
-    private Circle visibilityCircle;
     private LocationCallback locationCallback;
     private TextView tvPercentageCovered;
 
@@ -69,7 +65,6 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         setupLocationCallback();
         tvPercentageCovered = findViewById(R.id.tvPercentageCovered);
-
     }
 
     private void setupMapFragment() {
@@ -108,20 +103,6 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
     @Override
     protected int getLayoutId() {return R.layout.activity_france_map;}
 
-    private void displayLocationsOnMap(List<Location> locations) {
-        for (Location location : locations) {
-            CircleOptions circleOptions = new CircleOptions()
-                    .center(new LatLng(location.getLatitude(), location.getLongitude()))
-                    .radius(500)
-                    .strokeColor(Color.RED)
-                    .fillColor(Color.argb(70, 255, 0, 0))
-                    .strokeWidth(2f)
-                    .zIndex(1.0f);
-
-            mMap.addCircle(circleOptions);
-        }
-    }
-
     private String loadJSONFromRawResource(int resourceId) {
         String json;
         try {
@@ -130,7 +111,7 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
             byte[] buffer = new byte[size];
             is.read(buffer);
             is.close();
-            json = new String(buffer, "UTF-8");
+            json = new String(buffer, StandardCharsets.UTF_8);
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
@@ -138,6 +119,57 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         return json;
     }
 
+    private double calculateExploredPercentage(long numberOfPositionsFound) {
+        double totalArea = Math.PI * Math.pow(500, 2) * numberOfPositionsFound;
+        double franceArea = 551695000000.0;
+        return (totalArea / franceArea) * 100.0;
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void displayExploredPercentage(double exploredPercentage) {
+        tvPercentageCovered.setText("Percentage covered: " + exploredPercentage + "%");
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        mMap = googleMap;
+        LatLng franceCenter = new LatLng(46.2276, 2.2137);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(franceCenter, 5));
+
+        LatLngBounds franceBounds = new LatLngBounds(
+                new LatLng(44.331, -4.141), // Southwest corner of France
+                new LatLng(51.089, 7.233)   // Northeast corner of France
+        );
+
+        mMap.setLatLngBoundsForCameraTarget(franceBounds);
+
+        mMap.setMinZoomPreference(5.6f);
+        mMap.setMaxZoomPreference(15.0f);
+
+        String customMapStyle = loadJSONFromRawResource(R.raw.my_custom_style);
+
+        if (customMapStyle != null) {
+            mMap.setMapStyle(new MapStyleOptions(customMapStyle));
+        }
+
+        GeoJsonManager geoJsonManager = new GeoJsonManager(this, mMap);
+        List<String> country_list = Arrays.asList("luxembourg", "germany", "ireland", "belgium", "united-kingdom", "italy", "spain", "portugal", "switzerland", "netherlands", "austria");
+        for (String country : country_list) {
+            geoJsonManager.loadGeoJsonLayer(country + ".geojson");
+        }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            enableLocationFeatures();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+
+        fetchAndDisplayCurrentUserLocations();
+        fetchAndDisplayAllUsersLocations();
+        fetchAndCalculateExploredPercentage();
+    }
 
     private void fetchAndCalculateExploredPercentage() {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -158,114 +190,70 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
             });
         }
     }
-
-    private double calculateExploredPercentage(long numberOfPositionsFound) {
-        double totalArea = Math.PI * Math.pow(500, 2) * numberOfPositionsFound;
-
-        // Superficie de la France en m² (à ajuster selon vos besoins)
-        double franceArea = 551695000000.0;
-        return (totalArea / franceArea) * 100.0;
-    }
-
-    private void displayExploredPercentage(double exploredPercentage) {
-        // Mettez à jour le TextView avec le pourcentage exploré
-        tvPercentageCovered.setText("Percentage covered: " + exploredPercentage + "%");
-    }
-
-
-
-
-    @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
-        mMap = googleMap;
-        LatLng franceCenter = new LatLng(46.2276, 2.2137);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(franceCenter, 5));
-
-        LatLngBounds franceBounds = new LatLngBounds(
-                new LatLng(44.331, -4.141), // Southwest corner of France
-                new LatLng(51.089, 7.233)   // Northeast corner of France
-        );
-
-        mMap.setLatLngBoundsForCameraTarget(franceBounds);
-
-        // Set minimum and maximum zoom
-        mMap.setMinZoomPreference(5.6f);
-        mMap.setMaxZoomPreference(15.0f);
-
-        // Load the JSON style from raw resource
-        String customMapStyle = loadJSONFromRawResource(R.raw.my_custom_style);
-
-        // Check if the JSON file loaded successfully
-        if (customMapStyle != null) {
-            mMap.setMapStyle(new MapStyleOptions(customMapStyle));
-        }
-
-        List<String> country_list = Arrays.asList("luxembourg", "germany", "ireland", "belgium", "united-kingdom", "italy", "spain", "portugal", "switzerland", "netherlands", "austria");
-        for (int i = 0; i < country_list.size(); i++) {
-            String geoJsonData = loadGeoJsonFromAsset(country_list.get(i) + ".geojson");
-            if (geoJsonData != null) {
-                addGeoJsonLayerToMap(mMap, geoJsonData, country_list.get(i));
-            }
-        }
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            enableLocationFeatures();
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-        }
-
-        visibilityCircle = mMap.addCircle(new CircleOptions()
-                .center(franceCenter)
-                .radius(1000)
-                .strokeColor(Color.TRANSPARENT)
-                .fillColor(Color.argb(70, 0, 0, 0)));
-
-        fetchAndDisplayUserLocations();
-        fetchAndCalculateExploredPercentage();
-    }
-
-
-    private String convertStreamToString(InputStream is) {
-        Scanner scanner = new Scanner(is).useDelimiter("\\A");
-        return scanner.hasNext() ? scanner.next() : "";
-    }
-
-    private void fetchAndDisplayUserLocations() {
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser != null) {
-            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(firebaseUser.getUid());
+    private void fetchAndDisplayCurrentUserLocations() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUser.getUid());
             userRef.child("positions_found").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    List<Location> locations = new ArrayList<>();
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        UserLocation userLocation = snapshot.getValue(UserLocation.class);
-                        if (userLocation != null) {
-                            locations.add(userLocation.toLocation());
+                    for (DataSnapshot positionSnapshot : dataSnapshot.getChildren()) {
+                        UserLocation location = positionSnapshot.getValue(UserLocation.class);
+                        if (location != null) {
+                            LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            mMap.addCircle(new CircleOptions()
+                                    .center(userLatLng)
+                                    .radius(500) // Radius in meters
+                                    .strokeColor(Color.RED)
+                                    .fillColor(Color.argb(70, 255, 0, 0))
+                                    .strokeWidth(2f));
                         }
                     }
-                    displayLocationsOnMap(locations);
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-                    Log.w("FranceMapActivity", "loadPositionsFound:onCancelled", databaseError.toException());
+                    Log.e("FranceMapActivity", "Error fetching current user locations", databaseError.toException());
                 }
             });
         }
     }
 
+
+
+    private void fetchAndDisplayAllUsersLocations() {
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                    DataSnapshot lastUpdatedPosSnapshot = userSnapshot.child("lastUpdatedPosition");
+                    if (lastUpdatedPosSnapshot.exists()) {
+                        double latitude = lastUpdatedPosSnapshot.child("latitude").getValue(Double.class);
+                        double longitude = lastUpdatedPosSnapshot.child("longitude").getValue(Double.class);
+                        LatLng userLocation = new LatLng(latitude, longitude);
+                        mMap.addMarker(new MarkerOptions().position(userLocation).title(userSnapshot.child("username").getValue(String.class)));
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("FranceMapActivity", "Error fetching user locations", databaseError.toException());
+            }
+        });
+    }
+
     private void setupLocationCallback() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(10000); // Update location every 10 seconds
+        locationRequest.setInterval(30000);
 
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 for (Location location : locationResult.getLocations()) {
+                    updateUserLastLocation(location);
                     checkAndSaveNewLocation(location);
                 }
             }
@@ -273,69 +261,53 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         startLocationUpdates(locationRequest);
     }
 
+    private void updateUserLastLocation(Location location) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users")
+                    .child(currentUser.getUid())
+                    .child("lastUpdatedPosition");
+
+            Map<String, Object> locationUpdate = new HashMap<>();
+            locationUpdate.put("latitude", location.getLatitude());
+            locationUpdate.put("longitude", location.getLongitude());
+            userRef.updateChildren(locationUpdate);
+        }
+    }
+
     private void checkAndSaveNewLocation(Location newLocation) {
-        UserLocation newUserLocation = UserLocation.fromLocation(newLocation); // Convert to UserLocation
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser != null) {
-            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(firebaseUser.getUid());
-            userRef.child("positions_found").addListenerForSingleValueEvent(new ValueEventListener() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            DatabaseReference positionsRef = FirebaseDatabase.getInstance()
+                    .getReference("users")
+                    .child(currentUser.getUid())
+                    .child("positions_found");
+
+            positionsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    boolean isNearbyLocation = false;
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        UserLocation savedUserLocation = snapshot.getValue(UserLocation.class);
-                        if (savedUserLocation != null) {
-                            Location savedLocation = savedUserLocation.toLocation(); // Convert to Android Location
-                            if (savedLocation.distanceTo(newLocation) < 500) {
-                                isNearbyLocation = true;
-                                break;
-                            }
+                        UserLocation savedLocation = snapshot.getValue(UserLocation.class);
+                        if (savedLocation != null && savedLocation.isNearby(newLocation, LOCATION_THRESHOLD_DISTANCE)) {
+                            return;
                         }
                     }
-                    if (!isNearbyLocation) {
-                        String key = userRef.child("positions_found").push().getKey();
-                        if (key != null) {
-                            userRef.child("positions_found").child(key).setValue(newUserLocation);
-                        }
-                    }
+                    saveNewUserLocation(newLocation, positionsRef);
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-                    Log.w("FranceMapActivity", "checkAndSaveNewLocation:onCancelled", databaseError.toException());
+                    Log.e("FranceMapActivity", "Error checking new location", databaseError.toException());
                 }
             });
         }
     }
 
-    private String loadGeoJsonFromAsset(String filename) {
-        try {
-            InputStream is = getAssets().open(filename);
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            int bytesRead = is.read(buffer);
-            if (bytesRead != size) {
-                Log.w("homePageActivity", "load Geo buffer size !=");
-            }
-            is.close();
-            return new String(buffer, StandardCharsets.UTF_8);
-        } catch (IOException ex) {
-            Log.e("homePageActivity", "Error reading GeoJSON file: " + filename, ex);
-            return null;
-        }
-    }
-
-    private void addGeoJsonLayerToMap(GoogleMap map, String geoJsonData, String countryName) {
-        try {
-            JSONObject geoJson = new JSONObject(geoJsonData);
-            GeoJsonLayer layer = new GeoJsonLayer(map, geoJson);
-            GeoJsonPolygonStyle style = layer.getDefaultPolygonStyle();
-            style.setFillColor(Color.BLACK);
-            style.setStrokeColor(Color.BLACK);
-            style.setStrokeWidth(2f);
-            layer.addLayerToMap();
-        } catch (Exception e) {
-            Log.e("homePageActivity", "Problem reading GeoJSON file for country: " + countryName, e);
+    private void saveNewUserLocation(Location location, DatabaseReference ref) {
+        UserLocation newUserLocation = UserLocation.fromLocation(location);
+        String key = ref.push().getKey();
+        if (key != null) {
+            ref.child(key).setValue(newUserLocation);
         }
     }
 

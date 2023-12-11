@@ -1,4 +1,4 @@
-package com.example.shareloc;
+package com.example.shareloc.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,10 +8,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.shareloc.R;
+import com.example.shareloc.Class.User;
+import com.example.shareloc.managers.ApiManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
 

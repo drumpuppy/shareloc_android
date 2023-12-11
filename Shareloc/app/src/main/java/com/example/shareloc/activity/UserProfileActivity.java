@@ -1,6 +1,9 @@
-package com.example.shareloc;
+package com.example.shareloc.activity;
 
+import com.example.shareloc.R;
+import com.example.shareloc.Class.User;
 import com.example.shareloc.databinding.ActivityUserProfileBinding;
+import com.example.shareloc.managers.ApiManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;

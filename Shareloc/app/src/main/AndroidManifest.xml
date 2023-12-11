@@ -12,19 +12,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Shareloc"
         tools:targetApi="31">
-        <activity android:name=".AmisActivity" android:exported="false" />
-        <activity android:name=".FranceMapActivity" android:exported="false" />
-        <activity android:name=".UserProfileActivity" android:exported="false" />
-        <activity android:name=".User" android:exported="false" />
-        <activity android:name=".homePageActivity" android:exported="false" />
-        <activity android:name=".MainActivity" android:exported="true">
+        <activity android:name=".activity.AmisActivity" android:exported="false" />
+        <activity android:name=".activity.FranceMapActivity" android:exported="false" />
+        <activity android:name=".activity.UserProfileActivity" android:exported="false" />
+        <activity android:name=".Class.User" android:exported="false" />
+        <activity android:name=".activity.homePageActivity" android:exported="false" />
+        <activity android:name=".activity.MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity" android:exported="false" />
-        <activity android:name=".RegisterActivity" android:exported="false" />
+        <activity android:name=".activity.LoginActivity" android:exported="false" />
+        <activity android:name=".activity.RegisterActivity" android:exported="false" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

@@ -1,7 +1,8 @@
-package com.example.shareloc;
+package com.example.shareloc.managers;
 
 import androidx.annotation.NonNull;
 
+import com.example.shareloc.Class.User;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
