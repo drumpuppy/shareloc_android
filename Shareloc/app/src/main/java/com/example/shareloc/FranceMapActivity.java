@@ -59,6 +59,7 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient fusedLocationClient;
     private Circle visibilityCircle;
     private LocationCallback locationCallback;
+    private List<Circle> circles = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -115,7 +116,21 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
                     .zIndex(1.0f);
 
             mMap.addCircle(circleOptions);
+
+            Circle circle = mMap.addCircle(circleOptions);
+            circles.add(circle);
         }
+    }
+
+    private double calculateExploredArea() {
+        double totalArea = 0;
+
+        for (Circle circle : circles) {
+            double circleArea = Math.PI * Math.pow(circle.getRadius(), 2);
+            totalArea += circleArea;
+        }
+
+        return totalArea;
     }
 
     private String loadJSONFromRawResource(int resourceId) {
@@ -139,6 +154,8 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         mMap = googleMap;
         LatLng franceCenter = new LatLng(46.2276, 2.2137);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(franceCenter, 5));
+
+        fetchAndDisplayUserLocations();
 
         LatLngBounds franceBounds = new LatLngBounds(
                 new LatLng(44.331, -4.141), // Southwest corner of France
