@@ -32,6 +32,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.data.geojson.GeoJsonFeature;
 import com.google.maps.android.data.geojson.GeoJsonLayer;
 import com.google.maps.android.data.geojson.GeoJsonPolygonStyle;
 
@@ -144,13 +145,26 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         }
 
 
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
             enableLocationFeatures();
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+
+        try {
+            InputStream inputStream = getAssets().open("france.geojson");
+            GeoJsonLayer franceLayer = new GeoJsonLayer(mMap, new JSONObject(convertStreamToString(inputStream)));
+            franceLayer.addLayerToMap();
+
+            for (GeoJsonFeature feature : franceLayer.getFeatures()) {
+                GeoJsonPolygonStyle style = new GeoJsonPolygonStyle();
+                style.setFillColor(Color.GRAY);
+                feature.setPolygonStyle(style);
+            }
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
         }
 
         visibilityCircle = mMap.addCircle(new CircleOptions()
@@ -160,7 +174,11 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
                 .fillColor(Color.argb(70, 0, 0, 0)));
 
         fetchAndDisplayUserLocations();
+    }
 
+    private String convertStreamToString(InputStream is) {
+        Scanner scanner = new Scanner(is).useDelimiter("\\A");
+        return scanner.hasNext() ? scanner.next() : "";
     }
 
     private void fetchAndDisplayUserLocations() {
@@ -226,7 +244,7 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
                     if (!isNearbyLocation) {
                         String key = userRef.child("positions_found").push().getKey();
                         if (key != null) {
-                            userRef.child("positions_found").child(key).setValue(newUserLocation); // Save UserLocation
+                            userRef.child("positions_found").child(key).setValue(newUserLocation);
                         }
                     }
                 }

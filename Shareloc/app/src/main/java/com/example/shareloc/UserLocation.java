@@ -5,6 +5,16 @@ import android.location.Location;
 public class UserLocation {
     private double latitude;
     private double longitude;
+    private String hexId;
+
+    public String getHexId() {
+        return hexId;
+    }
+
+    public void setHexId(String hexId) {
+        this.hexId = hexId;
+    }
+
     public UserLocation() {
     }
     public UserLocation(double latitude, double longitude) {
