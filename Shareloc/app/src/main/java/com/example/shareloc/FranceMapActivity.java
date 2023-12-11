@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -59,6 +60,7 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient fusedLocationClient;
     private Circle visibilityCircle;
     private LocationCallback locationCallback;
+    private TextView tvPercentageCovered;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,6 +68,8 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         setupMapFragment();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         setupLocationCallback();
+        tvPercentageCovered = findViewById(R.id.tvPercentageCovered);
+
     }
 
     private void setupMapFragment() {
@@ -134,6 +138,43 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         return json;
     }
 
+
+    private void fetchAndCalculateExploredPercentage() {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(firebaseUser.getUid());
+            userRef.child("positions_found").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    long numberOfPositionsFound = dataSnapshot.getChildrenCount();
+                    double exploredPercentage = calculateExploredPercentage(numberOfPositionsFound);
+                    displayExploredPercentage(exploredPercentage);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.w("FranceMapActivity", "fetchAndCalculateExploredPercentage:onCancelled", databaseError.toException());
+                }
+            });
+        }
+    }
+
+    private double calculateExploredPercentage(long numberOfPositionsFound) {
+        double totalArea = Math.PI * Math.pow(500, 2) * numberOfPositionsFound;
+
+        // Superficie de la France en m² (à ajuster selon vos besoins)
+        double franceArea = 551695000000.0;
+        return (totalArea / franceArea) * 100.0;
+    }
+
+    private void displayExploredPercentage(double exploredPercentage) {
+        // Mettez à jour le TextView avec le pourcentage exploré
+        tvPercentageCovered.setText("Percentage covered: " + exploredPercentage + "%");
+    }
+
+
+
+
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
@@ -182,6 +223,7 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
                 .fillColor(Color.argb(70, 0, 0, 0)));
 
         fetchAndDisplayUserLocations();
+        fetchAndCalculateExploredPercentage();
     }
 
 

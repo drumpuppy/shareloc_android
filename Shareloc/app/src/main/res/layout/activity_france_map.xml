@@ -21,10 +21,10 @@
                 android:id="@+id/tvPercentageCovered"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
-                android:text="Percentage covered: XX%"
-                android:textSize="16sp" />
+                android:text="Percentage covered: "
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/map"
