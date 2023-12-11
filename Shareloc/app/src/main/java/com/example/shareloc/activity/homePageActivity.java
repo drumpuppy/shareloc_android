@@ -25,6 +25,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -104,9 +106,31 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                 }
 
                 loadCurrentUserAndSetupMap();
+                fetchAndDisplayAllUsersLocations();
         }
 
+        private void fetchAndDisplayAllUsersLocations() {
+                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+                usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                                        DataSnapshot lastUpdatedPosSnapshot = userSnapshot.child("lastUpdatedPosition");
+                                        if (lastUpdatedPosSnapshot.exists()) {
+                                                double latitude = lastUpdatedPosSnapshot.child("latitude").getValue(Double.class);
+                                                double longitude = lastUpdatedPosSnapshot.child("longitude").getValue(Double.class);
+                                                LatLng userLocation = new LatLng(latitude, longitude);
+                                                mMap.addMarker(new MarkerOptions().position(userLocation).title(userSnapshot.child("username").getValue(String.class)));
+                                        }
+                                }
+                        }
 
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                                Log.e("FranceMapActivity", "Error fetching user locations", databaseError.toException());
+                        }
+                });
+        }
         private void loadCurrentUserAndSetupMap() {
                 FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                 if (firebaseUser != null) {
