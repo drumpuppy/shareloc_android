@@ -21,7 +21,6 @@
         android:background="@color/menu_item_bg_color"
         style="@style/MenuItemStyle"/>
 
-
     <item
         android:id="@+id/nav_user"
         android:title="@string/user_profile"
@@ -29,11 +28,65 @@
         android:background="@color/menu_item_bg_color"
         style="@style/MenuItemStyle"/>
 
+    <!-- Élément vide pour la séparation -->
+    <item
+        android:title=""
+        android:background="@android:color/transparent"
+        android:enabled="false"
+        android:checkable="false"/>
+
+    <item
+        android:title=""
+        android:background="@android:color/transparent"
+        android:enabled="false"
+        android:checkable="false"/>
+
+    <item
+        android:title=""
+        android:background="@android:color/transparent"
+        android:enabled="false"
+        android:checkable="false"/>
+
+    <item
+        android:title=""
+        android:background="@android:color/transparent"
+        android:enabled="false"
+        android:checkable="false"/>
+
+    <item
+        android:title=""
+        android:background="@android:color/transparent"
+        android:enabled="false"
+        android:checkable="false"/>
+
+    <item
+        android:title=""
+        android:background="@android:color/transparent"
+        android:enabled="false"
+        android:checkable="false"/>
+
+    <item
+        android:title=""
+        android:background="@android:color/transparent"
+        android:enabled="false"
+        android:checkable="false"/>
+
+    <item
+        android:title=""
+        android:background="@android:color/transparent"
+        android:enabled="false"
+        android:checkable="false"/>
+
+    <item
+        android:title=""
+        android:background="@android:color/transparent"
+        android:enabled="false"
+        android:checkable="false"/>
+
     <item
         android:id="@+id/nav_logout"
         android:title="@string/logout"
         android:icon="@drawable/logout"
-        android:background="@color/menu_item_bg_color"
         style="@style/MenuItemStyle"/>
 
 
