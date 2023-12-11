@@ -13,8 +13,6 @@ public class User {
     private Map<String, Boolean> countriesVisited;
     private Map<String, Boolean> achievements;
     private List<Location> positions_found;
-    private List<String> friends;
-
 
     public User() {
         this.username = "";
@@ -22,7 +20,6 @@ public class User {
         this.countriesVisited = createDefaultCountries();
         this.achievements = createDefaultAchievements();
         this.positions_found = createDefaultPostionFound();
-        this.friends = new ArrayList<>();
     }
     public User(String username,String nickname) {
         this.username = username;
@@ -30,7 +27,6 @@ public class User {
         this.countriesVisited = createDefaultCountries();
         this.achievements = createDefaultAchievements();
         this.positions_found = createDefaultPostionFound();
-        this.friends = new ArrayList<>();
     }
 
     private List<Location> createDefaultPostionFound(){
@@ -243,10 +239,6 @@ public class User {
 
     public String getNickname() {
         return nickname;
-    }
-
-    public List<String> getFriends() {
-        return friends;
     }
 
     public Map<String, Boolean> getCountriesVisited() {
