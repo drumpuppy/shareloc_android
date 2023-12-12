@@ -36,6 +36,12 @@ public class MainActivity extends BaseActivity {
             }
         });
 
+        Button challengeButton = findViewById(R.id.buttonChallenge);
+        challengeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {openFranceActivity();}
+        });
+
     }
 
     @Override
@@ -45,6 +51,11 @@ public class MainActivity extends BaseActivity {
 
     private void openHomePage() {
         Intent intent = new Intent(MainActivity.this, homePageActivity.class);
+        startActivity(intent);
+    }
+
+    private void openFranceActivity() {
+        Intent intent = new Intent(MainActivity.this, FranceMapActivity.class);
         startActivity(intent);
     }
 }
