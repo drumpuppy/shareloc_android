@@ -1,7 +1,6 @@
 package com.example.shareloc;
 
 import android.location.Location;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,28 +11,27 @@ public class User {
     private String nickname;
     private Map<String, Boolean> countriesVisited;
     private Map<String, Boolean> achievements;
-    private List<String> friends;
-    private List<Location> positionsFound;
+    private List<Location> positions_found;
+    private List<String> friendList; // Added field for storing friends
 
     public User() {
         this.username = "";
         this.nickname = "";
         this.countriesVisited = createDefaultCountries();
         this.achievements = createDefaultAchievements();
-        this.friends = new ArrayList<>();
-        this.positionsFound = new ArrayList<>();
+        this.positions_found = createDefaultPostionFound();
+        this.friendList = new ArrayList<>();
     }
-
-    public User(String username, String nickname) {
+    public User(String username,String nickname) {
         this.username = username;
         this.nickname = nickname;
         this.countriesVisited = createDefaultCountries();
         this.achievements = createDefaultAchievements();
-        this.friends = new ArrayList<>();
-        this.positionsFound = new ArrayList<>();
+        this.positions_found = createDefaultPostionFound();
+        this.friendList = new ArrayList<>();
     }
 
-    private List<Location> createDefaultPostionFound() {
+    private List<Location> createDefaultPostionFound(){
         return new ArrayList<>();
     }
 
@@ -44,12 +42,26 @@ public class User {
         achievements.put("Expert: trouve 40 pays", false);
         achievements.put("God Save the Queen: trouve tous les pays du CommonWealth", false);
         achievements.put("Mister WorldWide: découvre le monde entier !", false);
-        achievements.put("I go solo: fais toi un ami", false);
+        achievements.put("I go solo: fais toi un ami",false);
         achievements.put("Où es-tu ?: découvre la carte d'un(e) ami(e)", false);
         achievements.put("Stalker: découvre la carte de 5 amis", false);
         achievements.put("Holy Moly: va au Vatican", false);
 
         return achievements;
+    }
+
+    public List<String> getFriendList() {
+        return friendList;
+    }
+
+    public void addFriend(String friendUsername) {
+        if (!friendList.contains(friendUsername)) {
+            friendList.add(friendUsername);
+        }
+    }
+
+    public void removeFriend(String friendUsername) {
+        friendList.remove(friendUsername);
     }
 
     private Map<String, Boolean> createDefaultCountries() {
@@ -236,6 +248,7 @@ public class User {
         return countries;
     }
 
+
     public String getUsername() {
         return username;
     }
@@ -252,10 +265,6 @@ public class User {
         return achievements;
     }
 
-    public List<String> getFriends() {
-        return friends;
-    }
-
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
@@ -266,13 +275,5 @@ public class User {
 
     public void setAchievements(Map<String, Boolean> achievements) {
         this.achievements = achievements;
-    }
-
-    public List<Location> getPositionsFound() {
-        return positionsFound;
-    }
-
-    public void setPositionsFound(List<Location> positionsFound) {
-        this.positionsFound = positionsFound;
     }
 }

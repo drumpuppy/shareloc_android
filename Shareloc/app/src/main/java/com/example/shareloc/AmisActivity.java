@@ -5,72 +5,71 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ArrayAdapter;
-import android.widget.Toast;
 import androidx.annotation.Nullable;
-import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import java.util.ArrayList;
+import java.util.List;
+import android.widget.ArrayAdapter;
 
 public class AmisActivity extends BaseActivity {
-    private ApiManager apiManager;
-    private ListView friendsListView;
-    private ArrayAdapter<String> adapter;
+
     private EditText friendIdEditText;
+    private ListView friendsListView;
     private Button addFriendButton;
+    private List<String> usernames;
+    private ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.amis_page);
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
-
-        apiManager = new ApiManager();
-        friendsListView = findViewById(R.id.friends_list_view);
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-        friendsListView.setAdapter(adapter);
-
         friendIdEditText = findViewById(R.id.friend_id_edit_text);
+        friendsListView = findViewById(R.id.friends_list_view);
         addFriendButton = findViewById(R.id.add_friend_button);
 
-        String userId = "replace_this_with_actual_user_id";
-        apiManager.getFriends(userId, new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                adapter.clear();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    String friendId = snapshot.getValue(String.class);
-                    adapter.add(friendId);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Handle the error
-            }
-        });
+        usernames = new ArrayList<>();
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, usernames);
+        friendsListView.setAdapter(adapter);
 
         addFriendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String friendId = friendIdEditText.getText().toString().trim();
-                if (!friendId.isEmpty()) {
-                    apiManager.addFriend(userId, friendId, new ApiManager.OnFriendAddedListener() {
-                        @Override
-                        public void onFriendAdded(boolean success) {
-                            if (success) {
-                                adapter.add(friendId);
-                                friendIdEditText.setText("");
-                            } else {
-                                Toast.makeText(AmisActivity.this, "Friend ID does not exist", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
+                String searchTerm = friendIdEditText.getText().toString().trim();
+                if (!searchTerm.isEmpty()) {
+                    loadUsernames(searchTerm);
                 }
             }
         });
+    }
+
+    private void loadUsernames(String searchTerm) {
+        ApiManager apiManager = new ApiManager();
+        apiManager.usersRef.orderByChild("username")
+                .startAt(searchTerm)
+                .endAt(searchTerm + "\uf8ff")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        usernames.clear();
+
+                        for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                            String username = userSnapshot.child("username").getValue(String.class);
+                            if (username != null) {
+                                usernames.add(username);
+                            }
+                        }
+
+                        adapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        // Handle errors
+                    }
+                });
     }
 
     @Override
