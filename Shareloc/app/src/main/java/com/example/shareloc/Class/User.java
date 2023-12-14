@@ -1,7 +1,5 @@
 package com.example.shareloc.Class;
-
 import android.location.Location;
-
 import com.example.shareloc.managers.GeoJsonManager;
 
 import java.util.ArrayList;
@@ -14,8 +12,10 @@ public class User {
     private String nickname;
     private Map<String, Boolean> countriesVisited;
     private Map<String, Boolean> achievements;
-    private List<Location> positions_found;
     private UserLocation lastUpdatedPosition;
+    transient private List<Location> positions_found;
+    private List<String> friendList;
+
     GeoJsonManager geoJsonManager;
     public User() {
         this.username = "";
@@ -24,6 +24,7 @@ public class User {
         this.achievements = createDefaultAchievements();
         this.positions_found = createDefaultPostionFound();
         this.lastUpdatedPosition = new UserLocation();
+        this.friendList = new ArrayList<>();
     }
     public User(String username,String nickname) {
         this.username = username;
@@ -32,6 +33,7 @@ public class User {
         this.achievements = createDefaultAchievements();
         this.positions_found = createDefaultPostionFound();
         this.lastUpdatedPosition = new UserLocation();
+        this.friendList = new ArrayList<>();
     }
 
 
@@ -59,6 +61,19 @@ public class User {
         achievements.put("Holy Moly: va au Vatican", false);
 
         return achievements;
+    }
+
+    public List<String> getFriendList() {
+        return friendList;
+    }
+
+    public void addFriend(String friendUsername) {
+        if (!friendList.contains(friendUsername)) {
+            friendList.add(friendUsername);
+        }
+    }
+    public void removeFriend(String friendUsername) {
+        friendList.remove(friendUsername);
     }
     public String getUsername() {
         return username;

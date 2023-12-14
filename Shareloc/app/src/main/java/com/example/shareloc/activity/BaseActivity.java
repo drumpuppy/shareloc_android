@@ -31,9 +31,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Navigati
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setBackgroundColor(ContextCompat.getColor(this, R.color.violet_clair));
-        if (navigationView != null) {
-            navigationView.setNavigationItemSelectedListener(this);
-        }
+        navigationView.setNavigationItemSelectedListener(this);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
