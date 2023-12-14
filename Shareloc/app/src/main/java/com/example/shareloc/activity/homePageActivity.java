@@ -235,6 +235,4 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                 mMap.clear();
                 loadCurrentUserAndSetupMap();
         }
-
-
 }
