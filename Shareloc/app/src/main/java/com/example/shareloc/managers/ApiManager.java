@@ -10,7 +10,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class ApiManager {
-    public final DatabaseReference usersRef;
+    private final DatabaseReference usersRef;
 
     public ApiManager() {
         usersRef = FirebaseDatabase.getInstance().getReference("users");

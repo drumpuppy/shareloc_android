@@ -17,11 +17,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:hint="Identifiant de l'ami"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/toolbar" />
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <ListView
             android:id="@+id/friends_list_view"
@@ -51,6 +51,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <Button
+            android:id="@+id/add_friend_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ajouter un ami"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"/>
     </RelativeLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>
