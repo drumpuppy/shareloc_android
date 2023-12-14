@@ -1,5 +1,7 @@
 package com.example.shareloc.activity;// AmisActivity.java
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -46,6 +48,15 @@ public class AmisActivity extends BaseActivity {
         friendsListView.setOnItemClickListener((parent, view, position, id) -> {
             User selectedUser = allUsers.get(position);
             handleUserSelection(selectedUser);
+        });
+
+        friendIdEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {loadUsernames(charSequence.toString());}
+            @Override
+            public void afterTextChanged(Editable s) {}
         });
 
 
