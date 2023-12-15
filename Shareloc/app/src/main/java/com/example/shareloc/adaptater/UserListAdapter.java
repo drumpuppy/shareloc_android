@@ -23,6 +23,8 @@ public class UserListAdapter extends FriendListAdapter {
     @NonNull
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return super.getView(position, convertView, parent);
+        View listItemView = super.getView(position, convertView, parent);
+        // Additional customization can be done here if needed
+        return listItemView;
     }
 }

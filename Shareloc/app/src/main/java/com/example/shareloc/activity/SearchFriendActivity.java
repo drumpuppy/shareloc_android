@@ -30,6 +30,8 @@ public class SearchFriendActivity extends BaseActivity {
     private List<User> allUsers;
     private String currentUserId;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
