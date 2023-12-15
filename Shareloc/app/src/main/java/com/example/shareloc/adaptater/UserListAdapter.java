@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 
 import com.example.shareloc.Class.User;
+
 import java.util.List;
 
 public class UserListAdapter extends FriendListAdapter {
@@ -18,6 +19,7 @@ public class UserListAdapter extends FriendListAdapter {
     public void updateData(List<User> newUsers) {
         clear();
         addAll(newUsers);
+        notifyDataSetChanged();
     }
 
     @NonNull

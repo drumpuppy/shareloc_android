@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.example.shareloc.R;
 import com.example.shareloc.Class.User;
 import com.example.shareloc.adaptater.UserListAdapter;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class AmisActivity extends BaseActivity {
+    private static final int REQUEST_CODE = 1;
     private ListView friendsListView;
     private UserListAdapter adapter;
     private DatabaseReference friendListRef;
@@ -41,10 +44,7 @@ public class AmisActivity extends BaseActivity {
         currentUserId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
         friendListRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId).child("friendList");
 
-
-        ImageView backButton = findViewById(R.id.loupe);
-        backButton.setOnClickListener(view -> openSearchActivity());
-
+        setupAdapter();
         loadFriends();
 
         friendIdEditText.addTextChangedListener(new TextWatcher() {
@@ -55,11 +55,34 @@ public class AmisActivity extends BaseActivity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
+
+        ImageView backButton = findViewById(R.id.loupe);
+        backButton.setOnClickListener(view -> openSearchActivity());
+    }
+
+    private void setupAdapter() {
+        adapter = new UserListAdapter(this, new ArrayList<>(), currentUserId);
+        adapter.setOnDataChangeListener(() -> loadFriends());
+        friendsListView.setAdapter(adapter);
     }
 
     private void openSearchActivity() {
         Intent intent = new Intent(AmisActivity.this, SearchFriendActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE) {
+            loadFriends();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadFriends();
     }
 
     private void loadFriends() {
@@ -72,6 +95,7 @@ public class AmisActivity extends BaseActivity {
                     friendIds.add(snapshot.getValue(String.class));
                 }
                 fetchFriendDetails(friendIds);
+                adapter.updateData(allUsers);
             }
 
             @Override
@@ -89,13 +113,12 @@ public class AmisActivity extends BaseActivity {
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     User friend = dataSnapshot.getValue(User.class);
                     if (friend != null) {
-                        friend.setUserId(dataSnapshot.getKey()); // Set the user ID
+                        friend.setUserId(dataSnapshot.getKey());
                         allUsers.add(friend);
                     }
 
-                    // Check if all friends are loaded
                     if (allUsers.size() == friendIds.size()) {
-                        updateListView(); // Update the list view once all friends are loaded
+                        updateListView();
                     }
                 }
 
@@ -108,8 +131,7 @@ public class AmisActivity extends BaseActivity {
     }
 
     private void updateListView() {
-        adapter = new UserListAdapter(this, allUsers, currentUserId);
-        friendsListView.setAdapter(adapter);
+        adapter.updateData(allUsers);
     }
 
     private void loadUsernames(String searchTerm) {
@@ -120,8 +142,7 @@ public class AmisActivity extends BaseActivity {
                 filteredUsers.add(user);
             }
         }
-        adapter = new UserListAdapter(this, filteredUsers, currentUserId);
-        friendsListView.setAdapter(adapter);
+        adapter.updateData(filteredUsers);
     }
 
     @Override

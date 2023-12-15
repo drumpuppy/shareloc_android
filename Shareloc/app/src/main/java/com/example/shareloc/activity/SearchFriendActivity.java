@@ -41,6 +41,8 @@ public class SearchFriendActivity extends BaseActivity {
         currentUserId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
         usersRef = FirebaseDatabase.getInstance().getReference("users");
 
+        setupAdapter();
+
         ImageView backButton = findViewById(R.id.back_button);
         backButton.setOnClickListener(view -> finish());
 
@@ -50,10 +52,17 @@ public class SearchFriendActivity extends BaseActivity {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {loadUsernames(charSequence.toString());}
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                loadUsernames(charSequence.toString());
+            }
             @Override
             public void afterTextChanged(Editable s) {}
         });
+    }
+    private void setupAdapter() {
+        adapter = new UserListAdapter(this, new ArrayList<>(), currentUserId);
+        adapter.setOnDataChangeListener(() -> loadAllUsers());
+        friendsListView.setAdapter(adapter);
     }
 
     private void loadAllUsers() {
@@ -64,10 +73,9 @@ public class SearchFriendActivity extends BaseActivity {
                 allUsers.clear();
                 for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
                     User user = userSnapshot.getValue(User.class);
-                    if (user != null) {
+                    if (user != null && !userSnapshot.getKey().equals(currentUserId)) {
                         user.setUserId(userSnapshot.getKey());
                         allUsers.add(user);
-                        Log.d("SearchFriendActivity", "Loaded user: " + user.getUsername() + ", ID: " + user.getUserId());
                     }
                 }
                 updateListView();
@@ -83,27 +91,22 @@ public class SearchFriendActivity extends BaseActivity {
 
 
     private void loadUsernames(String searchTerm) {
-        Log.d("SearchFriendActivity", "Searching for: " + searchTerm);
         searchTerm = searchTerm.toLowerCase();
         List<User> filteredUsers = new ArrayList<>();
         for (User user : allUsers) {
             if (user.getUsername().toLowerCase().contains(searchTerm)) {
                 filteredUsers.add(user);
-                Log.d("SearchFriendActivity", "Matched user: " + user.getUsername());
             }
         }
-        adapter = new UserListAdapter(this, filteredUsers, currentUserId);
-        friendsListView.setAdapter(adapter);
+        adapter.updateData(filteredUsers);
     }
 
-
     private void updateListView() {
-        adapter = new UserListAdapter(this, allUsers, currentUserId);
-        friendsListView.setAdapter(adapter);
+        adapter.updateData(allUsers);
     }
 
     @Override
     protected int getLayoutId() {
-        return R.layout.amis_page;
+        return R.layout.search_friend;
     }
 }

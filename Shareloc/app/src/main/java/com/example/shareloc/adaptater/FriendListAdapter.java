@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,9 +29,16 @@ public class FriendListAdapter extends ArrayAdapter<User> {
     private Context context;
     private List<User> users;
     private String currentUserId;
-
     private List<String> friendUserIds;
+    private OnDataChangeListener onDataChangeListener;
 
+    public interface OnDataChangeListener {
+        void onDataChanged();
+    }
+
+    public void setOnDataChangeListener(OnDataChangeListener listener) {
+        this.onDataChangeListener = listener;
+    }
 
     public FriendListAdapter(Context context, List<User> users, String currentUserId) {
         super(context, R.layout.friend_list_item, users);
@@ -42,29 +49,29 @@ public class FriendListAdapter extends ArrayAdapter<User> {
         loadFriendUserIds();
     }
 
-
+    @SuppressLint("ViewHolder")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        @SuppressLint("ViewHolder") View listItemView = inflater.inflate(R.layout.friend_list_item, parent, false);
+        View listItemView = inflater.inflate(R.layout.friend_list_item, parent, false);
 
         TextView tvUsername = listItemView.findViewById(R.id.tvUsername);
-        Button btnFollow = listItemView.findViewById(R.id.btnFollow);
-        Button btnUnfollow = listItemView.findViewById(R.id.btnUnfollow);
+        ImageView imgFollow = listItemView.findViewById(R.id.imgFollow);
+        ImageView imgUnfollow = listItemView.findViewById(R.id.imgUnfollow);
 
         User user = getItem(position);
         tvUsername.setText(user.getUsername());
 
         if (isUserFollowed(user.getUserId())) {
-            btnFollow.setVisibility(View.GONE);
-            btnUnfollow.setVisibility(View.VISIBLE);
+            imgFollow.setVisibility(View.GONE);
+            imgUnfollow.setVisibility(View.VISIBLE);
         } else {
-            btnFollow.setVisibility(View.VISIBLE);
-            btnUnfollow.setVisibility(View.GONE);
+            imgFollow.setVisibility(View.VISIBLE);
+            imgUnfollow.setVisibility(View.GONE);
         }
 
-        btnFollow.setOnClickListener(view -> handleFollow(user.getUserId()));
-        btnUnfollow.setOnClickListener(view -> handleUnfollow(user.getUserId()));
+        imgFollow.setOnClickListener(view -> handleFollow(user.getUserId()));
+        imgUnfollow.setOnClickListener(view -> handleUnfollow(user.getUserId()));
 
         return listItemView;
     }
@@ -98,16 +105,11 @@ public class FriendListAdapter extends ArrayAdapter<User> {
         });
     }
 
-    public void setFriendIds(List<String> friendIds) {
-        this.friendUserIds = friendIds;
-    }
-
     private void handleFollow(String userId) {
         DatabaseReference friendListRef = FirebaseDatabase.getInstance().getReference("users")
                 .child(currentUserId)
                 .child("friendList");
 
-        // Check if the userId is already in the friend list
         friendListRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -120,15 +122,14 @@ public class FriendListAdapter extends ArrayAdapter<User> {
                 }
 
                 if (!alreadyFriend) {
-                    // Friend not in list, add them using push() to generate a unique key
                     friendListRef.push().setValue(userId)
                             .addOnSuccessListener(aVoid -> {
                                 Toast.makeText(context, "Followed user", Toast.LENGTH_SHORT).show();
-                                // Optionally, update your local list or UI as necessary
+                                if (onDataChangeListener != null) {
+                                    onDataChangeListener.onDataChanged();
+                                }
                             })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(context, "Failed to follow user", Toast.LENGTH_SHORT).show();
-                            });
+                            .addOnFailureListener(e -> Toast.makeText(context, "Failed to follow user", Toast.LENGTH_SHORT).show());
                 } else {
                     Toast.makeText(context, "User already followed", Toast.LENGTH_SHORT).show();
                 }
@@ -141,13 +142,11 @@ public class FriendListAdapter extends ArrayAdapter<User> {
         });
     }
 
-
     private void handleUnfollow(String userId) {
         DatabaseReference friendListRef = FirebaseDatabase.getInstance().getReference("users")
                 .child(currentUserId)
                 .child("friendList");
 
-        // Find the key for the userId to unfollow
         friendListRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -160,9 +159,13 @@ public class FriendListAdapter extends ArrayAdapter<User> {
                 }
 
                 if (keyToRemove != null) {
-                    // Remove the friend using the key
                     friendListRef.child(keyToRemove).removeValue()
-                            .addOnSuccessListener(aVoid -> Toast.makeText(context, "Unfollowed user", Toast.LENGTH_SHORT).show())
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(context, "Unfollowed user", Toast.LENGTH_SHORT).show();
+                                if (onDataChangeListener != null) {
+                                    onDataChangeListener.onDataChanged();
+                                }
+                            })
                             .addOnFailureListener(e -> Toast.makeText(context, "Failed to unfollow user", Toast.LENGTH_SHORT).show());
                 } else {
                     Toast.makeText(context, "User not found in friend list", Toast.LENGTH_SHORT).show();
@@ -172,29 +175,6 @@ public class FriendListAdapter extends ArrayAdapter<User> {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(context, "Error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-
-    private void getFriendKey(String username, FriendKeyCallback callback) {
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId);
-        userRef.child("friendList").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    String friendUsername = snapshot.getValue(String.class);
-                    if (username.equals(friendUsername)) {
-                        callback.onKeyFound(snapshot.getKey());
-                        return;
-                    }
-                }
-                callback.onError("Key not found");
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                callback.onError(databaseError.getMessage());
             }
         });
     }
