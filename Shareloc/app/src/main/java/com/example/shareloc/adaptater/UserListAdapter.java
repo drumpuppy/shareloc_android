@@ -15,6 +15,11 @@ public class UserListAdapter extends FriendListAdapter {
         super(context, users, currentUserId);
     }
 
+    public void updateData(List<User> newUsers) {
+        clear();
+        addAll(newUsers);
+    }
+
     @NonNull
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {

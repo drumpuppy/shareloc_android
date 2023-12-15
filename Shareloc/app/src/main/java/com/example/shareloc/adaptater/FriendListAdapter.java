@@ -39,7 +39,7 @@ public class FriendListAdapter extends ArrayAdapter<User> {
         this.users = users;
         this.currentUserId = currentUserId;
         this.friendUserIds = new ArrayList<>();
-        loadFriendUserIds(); // Load friend IDs initially
+        loadFriendUserIds();
     }
 
 
@@ -52,10 +52,10 @@ public class FriendListAdapter extends ArrayAdapter<User> {
         Button btnFollow = listItemView.findViewById(R.id.btnFollow);
         Button btnUnfollow = listItemView.findViewById(R.id.btnUnfollow);
 
-        User user = users.get(position);
+        User user = getItem(position);
         tvUsername.setText(user.getUsername());
 
-        if (isUserFollowed(String.valueOf(user))) {
+        if (isUserFollowed(user.getUserId())) {
             btnFollow.setVisibility(View.GONE);
             btnUnfollow.setVisibility(View.VISIBLE);
         } else {
@@ -98,6 +98,9 @@ public class FriendListAdapter extends ArrayAdapter<User> {
         });
     }
 
+    public void setFriendIds(List<String> friendIds) {
+        this.friendUserIds = friendIds;
+    }
 
     private void handleFollow(String userId) {
         DatabaseReference friendListRef = FirebaseDatabase.getInstance().getReference("users")

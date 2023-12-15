@@ -4,10 +4,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -16,9 +12,7 @@ import androidx.annotation.NonNull;
 import com.example.shareloc.R;
 import com.example.shareloc.Class.User;
 import com.example.shareloc.adaptater.UserListAdapter;
-import com.example.shareloc.managers.ApiManager;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,9 +23,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class SearchFriendActivity extends BaseActivity {
-    private ApiManager apiManager;
 
-    private EditText friendIdEditText;
     private ListView friendsListView;
     private UserListAdapter adapter;
     private DatabaseReference usersRef;
@@ -45,12 +37,11 @@ public class SearchFriendActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_friend);
 
-        friendIdEditText = findViewById(R.id.friend_id_edit_text);
+        EditText friendIdEditText = findViewById(R.id.friend_id_edit_text);
         friendsListView = findViewById(R.id.friends_list_view);
         allUsers = new ArrayList<>();
-        currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        currentUserId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
         usersRef = FirebaseDatabase.getInstance().getReference("users");
-        apiManager = new ApiManager();
 
         ImageView backButton = findViewById(R.id.back_button);
         backButton.setOnClickListener(view -> finish());
