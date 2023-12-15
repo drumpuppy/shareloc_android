@@ -1,19 +1,20 @@
-package com.example.shareloc.activity;// AmisActivity.java
+package com.example.shareloc.activity;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import com.example.shareloc.R;
 import com.example.shareloc.Class.User;
 import com.example.shareloc.adaptater.UserListAdapter;
-import com.example.shareloc.managers.ApiManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -22,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class AmisActivity extends BaseActivity {
 
@@ -40,49 +42,81 @@ public class AmisActivity extends BaseActivity {
         friendIdEditText = findViewById(R.id.friend_id_edit_text);
         friendsListView = findViewById(R.id.friends_list_view);
         allUsers = new ArrayList<>();
-        currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        currentUserId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
         usersRef = FirebaseDatabase.getInstance().getReference("users");
 
-        loadAllUsers();
+        // Load friends
+        loadFriends();
 
-        friendsListView.setOnItemClickListener((parent, view, position, id) -> {
-            User selectedUser = allUsers.get(position);
-            handleUserSelection(selectedUser);
-        });
-
+        // Setup search functionality
         friendIdEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {loadUsernames(charSequence.toString());}
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                loadUsernames(charSequence.toString());
+            }
             @Override
             public void afterTextChanged(Editable s) {}
         });
 
-
-
+        // Setup add friend button
+        ImageView backButton = findViewById(R.id.loupe);
+        backButton.setOnClickListener(view -> openSearchActivity());
     }
 
-    private void loadAllUsers() {
-        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+    private void openSearchActivity() {
+        Intent intent = new Intent(AmisActivity.this, SearchFriendActivity.class);
+        startActivity(intent);
+    }
+
+    private void loadFriends() {
+        DatabaseReference currentUserRef = usersRef.child(currentUserId).child("friendList");
+        Log.d("AmisActivity", "Loading friends for user: " + currentUserId);
+
+        currentUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                allUsers.clear();
-                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                    User user = userSnapshot.getValue(User.class);
-                    if (user != null) {
-                        allUsers.add(user);
-                    }
+                if (!dataSnapshot.exists()) {
+                    Log.d("AmisActivity", "No friends found in friendList for user: " + currentUserId);
+                    return;
                 }
-                updateListView();
+
+                allUsers.clear();
+                for (DataSnapshot friendSnapshot : dataSnapshot.getChildren()) {
+                    String friendUserId = friendSnapshot.getKey();
+                    Log.d("AmisActivity", "Friend ID found: " + friendUserId);
+
+                    DatabaseReference friendRef = usersRef.child(friendUserId);
+                    friendRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            User friend = dataSnapshot.getValue(User.class);
+                            if (friend != null) {
+                                allUsers.add(friend);
+                                Log.d("AmisActivity", "Added friend: " + friend.getUsername());
+                            } else {
+                                Log.d("AmisActivity", "Friend data is null for ID: " + friendUserId);
+                            }
+                            updateListView();
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            Log.e("AmisActivity", "Error fetching friend details: " + databaseError.getMessage());
+                        }
+                    });
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(AmisActivity.this, "Error fetching users: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("AmisActivity", "Error fetching friends list: " + databaseError.getMessage());
             }
         });
     }
+
+
 
 
     private void loadUsernames(String searchTerm) {
@@ -100,32 +134,6 @@ public class AmisActivity extends BaseActivity {
     private void updateListView() {
         adapter = new UserListAdapter(this, allUsers, currentUserId);
         friendsListView.setAdapter(adapter);
-    }
-
-    private void handleUserSelection(User selectedUser) {
-        DatabaseReference currentUserRef = usersRef.child(currentUserId);
-        currentUserRef.child("friendList").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                List<String> friendList = dataSnapshot.getValue(List.class);
-                if (friendList == null) {
-                    friendList = new ArrayList<>();
-                }
-                if (friendList.contains(selectedUser.getUsername())) {
-                    friendList.remove(selectedUser.getUsername());
-                    Toast.makeText(AmisActivity.this, "Unfollowed " + selectedUser.getUsername(), Toast.LENGTH_SHORT).show();
-                } else {
-                    friendList.add(selectedUser.getUsername());
-                    Toast.makeText(AmisActivity.this, "Followed " + selectedUser.getUsername(), Toast.LENGTH_SHORT).show();
-                }
-                currentUserRef.child("friendList").setValue(friendList);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(AmisActivity.this, "Error updating friend list: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     @Override

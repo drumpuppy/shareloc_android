@@ -1,5 +1,6 @@
 package com.example.shareloc.adaptater;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FriendListAdapter extends ArrayAdapter<User> {
@@ -25,17 +27,22 @@ public class FriendListAdapter extends ArrayAdapter<User> {
     private List<User> users;
     private String currentUserId;
 
+    private List<String> friendUsernames;
+
+
     public FriendListAdapter(Context context, List<User> users, String currentUserId) {
         super(context, R.layout.friend_list_item, users);
         this.context = context;
         this.users = users;
         this.currentUserId = currentUserId;
+        this.friendUsernames = new ArrayList<>();
     }
+
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        View listItemView = inflater.inflate(R.layout.friend_list_item, parent, false);
+        @SuppressLint("ViewHolder") View listItemView = inflater.inflate(R.layout.friend_list_item, parent, false);
 
         TextView tvUsername = listItemView.findViewById(R.id.tvUsername);
         Button btnFollow = listItemView.findViewById(R.id.btnFollow);
@@ -44,11 +51,29 @@ public class FriendListAdapter extends ArrayAdapter<User> {
         User user = users.get(position);
         tvUsername.setText(user.getUsername());
 
+        // Check if the current user is already followed
+        if (isUserFollowed(user)) {
+            btnFollow.setVisibility(View.GONE);
+            btnUnfollow.setVisibility(View.VISIBLE);
+        } else {
+            btnFollow.setVisibility(View.VISIBLE);
+            btnUnfollow.setVisibility(View.GONE);
+        }
+
         btnFollow.setOnClickListener(view -> handleFollow(user.getUsername()));
         btnUnfollow.setOnClickListener(view -> handleUnfollow(user.getUsername()));
 
         return listItemView;
     }
+
+    private boolean isUserFollowed(User user) {
+        if (friendUsernames == null) {
+            return false;
+        }
+        return friendUsernames.contains(user.getUsername());
+    }
+
+
 
     private void handleFollow(String username) {
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId);

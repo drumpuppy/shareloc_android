@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 public class User {
+    private String userId;
+    private String email;
+
     private String username;
     private String nickname;
     private Map<String, Boolean> countriesVisited;
@@ -86,5 +89,20 @@ public class User {
 
     public void setAchievements(Map<String, Boolean> achievements) {
         this.achievements = achievements;
+    }
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

@@ -13,6 +13,7 @@
         android:theme="@style/Theme.Shareloc"
         tools:targetApi="31">
         <activity android:name=".activity.AmisActivity" android:exported="false" />
+        <activity android:name=".activity.SearchFriendActivity" android:exported="true"/>
         <activity android:name=".activity.FranceMapActivity" android:exported="false" />
         <activity android:name=".activity.UserProfileActivity" android:exported="false" />
         <activity android:name=".Class.User" android:exported="false" />

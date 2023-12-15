@@ -17,4 +17,5 @@
     <string name="amis">Amis</string>
     <string name="user_profile">User Profile</string>
     <string name="challenge">Challenge</string>
+    <string name="back">back</string>
 </resources>
