@@ -2,6 +2,7 @@ package com.example.shareloc.adaptater;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.example.shareloc.Class.User;
 import com.example.shareloc.R;
@@ -27,7 +30,7 @@ public class FriendListAdapter extends ArrayAdapter<User> {
     private List<User> users;
     private String currentUserId;
 
-    private List<String> friendUsernames;
+    private List<String> friendUserIds;
 
 
     public FriendListAdapter(Context context, List<User> users, String currentUserId) {
@@ -35,7 +38,8 @@ public class FriendListAdapter extends ArrayAdapter<User> {
         this.context = context;
         this.users = users;
         this.currentUserId = currentUserId;
-        this.friendUsernames = new ArrayList<>();
+        this.friendUserIds = new ArrayList<>();
+        loadFriendUserIds(); // Load friend IDs initially
     }
 
 
@@ -51,8 +55,7 @@ public class FriendListAdapter extends ArrayAdapter<User> {
         User user = users.get(position);
         tvUsername.setText(user.getUsername());
 
-        // Check if the current user is already followed
-        if (isUserFollowed(user)) {
+        if (isUserFollowed(String.valueOf(user))) {
             btnFollow.setVisibility(View.GONE);
             btnUnfollow.setVisibility(View.VISIBLE);
         } else {
@@ -60,44 +63,116 @@ public class FriendListAdapter extends ArrayAdapter<User> {
             btnUnfollow.setVisibility(View.GONE);
         }
 
-        btnFollow.setOnClickListener(view -> handleFollow(user.getUsername()));
-        btnUnfollow.setOnClickListener(view -> handleUnfollow(user.getUsername()));
+        btnFollow.setOnClickListener(view -> handleFollow(user.getUserId()));
+        btnUnfollow.setOnClickListener(view -> handleUnfollow(user.getUserId()));
 
         return listItemView;
     }
 
-    private boolean isUserFollowed(User user) {
-        if (friendUsernames == null) {
-            return false;
-        }
-        return friendUsernames.contains(user.getUsername());
+    private boolean isUserFollowed(String userId) {
+        return friendUserIds.contains(userId);
     }
 
+    private void loadFriendUserIds() {
+        DatabaseReference friendListRef = FirebaseDatabase.getInstance().getReference("users")
+                .child(currentUserId)
+                .child("friendList");
 
-
-    private void handleFollow(String username) {
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId);
-        userRef.child("friendList").push().setValue(username)
-                .addOnSuccessListener(aVoid -> Toast.makeText(context, "Followed " + username, Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(context, "Failed to follow " + username, Toast.LENGTH_SHORT).show());
-    }
-
-    private void handleUnfollow(String username) {
-        getFriendKey(username, new FriendKeyCallback() {
+        friendListRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onKeyFound(String key) {
-                DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId);
-                userRef.child("friendList").child(key).removeValue()
-                        .addOnSuccessListener(aVoid -> Toast.makeText(context, "Unfollowed " + username, Toast.LENGTH_SHORT).show())
-                        .addOnFailureListener(e -> Toast.makeText(context, "Failed to unfollow " + username, Toast.LENGTH_SHORT).show());
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                friendUserIds.clear();
+                for (DataSnapshot friendSnapshot : dataSnapshot.getChildren()) {
+                    String friendUserId = friendSnapshot.getValue(String.class);
+                    if (friendUserId != null) {
+                        friendUserIds.add(friendUserId);
+                    }
+                }
+                notifyDataSetChanged();
             }
 
             @Override
-            public void onError(String error) {
-                Toast.makeText(context, "Error: " + error, Toast.LENGTH_SHORT).show();
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("FriendListAdapter", "Error loading friend user IDs: " + databaseError.getMessage());
             }
         });
     }
+
+
+    private void handleFollow(String userId) {
+        DatabaseReference friendListRef = FirebaseDatabase.getInstance().getReference("users")
+                .child(currentUserId)
+                .child("friendList");
+
+        // Check if the userId is already in the friend list
+        friendListRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                boolean alreadyFriend = false;
+                for (DataSnapshot friendSnapshot : dataSnapshot.getChildren()) {
+                    if (friendSnapshot.getValue(String.class).equals(userId)) {
+                        alreadyFriend = true;
+                        break;
+                    }
+                }
+
+                if (!alreadyFriend) {
+                    // Friend not in list, add them using push() to generate a unique key
+                    friendListRef.push().setValue(userId)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(context, "Followed user", Toast.LENGTH_SHORT).show();
+                                // Optionally, update your local list or UI as necessary
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(context, "Failed to follow user", Toast.LENGTH_SHORT).show();
+                            });
+                } else {
+                    Toast.makeText(context, "User already followed", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(context, "Error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private void handleUnfollow(String userId) {
+        DatabaseReference friendListRef = FirebaseDatabase.getInstance().getReference("users")
+                .child(currentUserId)
+                .child("friendList");
+
+        // Find the key for the userId to unfollow
+        friendListRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String keyToRemove = null;
+                for (DataSnapshot friendSnapshot : dataSnapshot.getChildren()) {
+                    if (friendSnapshot.getValue(String.class).equals(userId)) {
+                        keyToRemove = friendSnapshot.getKey();
+                        break;
+                    }
+                }
+
+                if (keyToRemove != null) {
+                    // Remove the friend using the key
+                    friendListRef.child(keyToRemove).removeValue()
+                            .addOnSuccessListener(aVoid -> Toast.makeText(context, "Unfollowed user", Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e -> Toast.makeText(context, "Failed to unfollow user", Toast.LENGTH_SHORT).show());
+                } else {
+                    Toast.makeText(context, "User not found in friend list", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(context, "Error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
     private void getFriendKey(String username, FriendKeyCallback callback) {
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId);

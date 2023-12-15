@@ -3,6 +3,9 @@ package com.example.shareloc.adaptater;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+
 import com.example.shareloc.Class.User;
 import java.util.List;
 
@@ -12,6 +15,7 @@ public class UserListAdapter extends FriendListAdapter {
         super(context, users, currentUserId);
     }
 
+    @NonNull
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View listItemView = super.getView(position, convertView, parent);

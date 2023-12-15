@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import com.example.shareloc.R;
@@ -84,21 +83,23 @@ public class AmisActivity extends BaseActivity {
 
                 allUsers.clear();
                 for (DataSnapshot friendSnapshot : dataSnapshot.getChildren()) {
-                    String friendUserId = friendSnapshot.getKey();
+                    String friendUserId = friendSnapshot.getValue(String.class); // Ensure this matches your database structure
                     Log.d("AmisActivity", "Friend ID found: " + friendUserId);
 
                     DatabaseReference friendRef = usersRef.child(friendUserId);
                     friendRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            User friend = dataSnapshot.getValue(User.class);
-                            if (friend != null) {
-                                allUsers.add(friend);
-                                Log.d("AmisActivity", "Added friend: " + friend.getUsername());
-                            } else {
-                                Log.d("AmisActivity", "Friend data is null for ID: " + friendUserId);
+                            if (dataSnapshot.exists()) {
+                                User friend = dataSnapshot.getValue(User.class);
+                                if (friend != null) {
+                                    allUsers.add(friend);
+                                    Log.d("AmisActivity", "Added friend: " + friend.getUsername());
+                                } else {
+                                    Log.d("AmisActivity", "Friend data is null for ID: " + friendUserId);
+                                }
                             }
-                            updateListView();
+                            updateListView(); // Move this inside the onDataChange
                         }
 
                         @Override
@@ -115,6 +116,7 @@ public class AmisActivity extends BaseActivity {
             }
         });
     }
+
 
 
 
