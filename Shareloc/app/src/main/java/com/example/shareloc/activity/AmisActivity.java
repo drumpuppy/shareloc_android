@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -25,6 +26,7 @@ import java.util.Objects;
 public class AmisActivity extends BaseActivity {
     private ListView friendsListView;
     private UserListAdapter adapter;
+    private DatabaseReference friendListRef;
     private List<User> allUsers;
     private String currentUserId;
 
@@ -37,25 +39,22 @@ public class AmisActivity extends BaseActivity {
         friendsListView = findViewById(R.id.friends_list_view);
         allUsers = new ArrayList<>();
         currentUserId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+        friendListRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId).child("friendList");
 
-        adapter = new UserListAdapter(this, new ArrayList<>(), currentUserId);
 
-        friendsListView.setAdapter(adapter);
+        ImageView backButton = findViewById(R.id.loupe);
+        backButton.setOnClickListener(view -> openSearchActivity());
+
         loadFriends();
 
         friendIdEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                loadUsernames(charSequence.toString());
-            }
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {loadUsernames(charSequence.toString());}
             @Override
             public void afterTextChanged(Editable s) {}
         });
-
-        ImageView backButton = findViewById(R.id.loupe);
-        backButton.setOnClickListener(view -> openSearchActivity());
     }
 
     private void openSearchActivity() {
@@ -64,11 +63,10 @@ public class AmisActivity extends BaseActivity {
     }
 
     private void loadFriends() {
-        DatabaseReference friendListRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId).child("friendList");
         friendListRef.addListenerForSingleValueEvent(new ValueEventListener() {
-
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                allUsers.clear();
                 List<String> friendIds = new ArrayList<>();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     friendIds.add(snapshot.getValue(String.class));
@@ -77,41 +75,42 @@ public class AmisActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {}
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("AmisActivity", "Error loading friend list: " + databaseError.getMessage());
+            }
         });
     }
 
     private void fetchFriendDetails(List<String> friendIds) {
-        List<User> friends = new ArrayList<>();
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
-
         for (String friendId : friendIds) {
             usersRef.child(friendId).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     User friend = dataSnapshot.getValue(User.class);
                     if (friend != null) {
-                        friends.add(friend);
+                        friend.setUserId(dataSnapshot.getKey()); // Set the user ID
+                        allUsers.add(friend);
                     }
 
-                    if (friends.size() == friendIds.size()) {
-                        adapter.updateData(friends);
-                        adapter.notifyDataSetChanged();
+                    // Check if all friends are loaded
+                    if (allUsers.size() == friendIds.size()) {
+                        updateListView(); // Update the list view once all friends are loaded
                     }
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {}
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.e("AmisActivity", "Error fetching friend details: " + databaseError.getMessage());
+                }
             });
         }
     }
 
-
-
-
-
-
-
+    private void updateListView() {
+        adapter = new UserListAdapter(this, allUsers, currentUserId);
+        friendsListView.setAdapter(adapter);
+    }
 
     private void loadUsernames(String searchTerm) {
         searchTerm = searchTerm.toLowerCase();
