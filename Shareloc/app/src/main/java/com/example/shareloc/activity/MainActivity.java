@@ -1,5 +1,6 @@
 package com.example.shareloc.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -57,5 +58,8 @@ public class MainActivity extends BaseActivity {
     private void openFranceActivity() {
         Intent intent = new Intent(MainActivity.this, FranceMapActivity.class);
         startActivity(intent);
+    }
+
+    public static class FriendMapActivity extends Activity {
     }
 }

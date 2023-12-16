@@ -2,6 +2,7 @@ package com.example.shareloc.adaptater;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import androidx.annotation.NonNull;
 
 import com.example.shareloc.Class.User;
 import com.example.shareloc.R;
+import com.example.shareloc.activity.MainActivity;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -58,6 +60,7 @@ public class FriendListAdapter extends ArrayAdapter<User> {
         TextView tvUsername = listItemView.findViewById(R.id.tvUsername);
         ImageView imgFollow = listItemView.findViewById(R.id.imgFollow);
         ImageView imgUnfollow = listItemView.findViewById(R.id.imgUnfollow);
+        ImageView imgViewMap = listItemView.findViewById(R.id.imgViewMap);
 
         User user = getItem(position);
         tvUsername.setText(user.getUsername());
@@ -65,15 +68,25 @@ public class FriendListAdapter extends ArrayAdapter<User> {
         if (isUserFollowed(user.getUserId())) {
             imgFollow.setVisibility(View.GONE);
             imgUnfollow.setVisibility(View.VISIBLE);
+            imgViewMap.setVisibility(View.VISIBLE);
         } else {
             imgFollow.setVisibility(View.VISIBLE);
             imgUnfollow.setVisibility(View.GONE);
+            imgViewMap.setVisibility(View.GONE);
         }
 
         imgFollow.setOnClickListener(view -> handleFollow(user.getUserId()));
         imgUnfollow.setOnClickListener(view -> handleUnfollow(user.getUserId()));
 
+        imgViewMap.setOnClickListener(view -> openFriendMap(user.getUserId()));
+
         return listItemView;
+    }
+
+    private void openFriendMap(String friendUserId) {
+        Intent intent = new Intent(context, MainActivity.FriendMapActivity.class);
+        intent.putExtra("friendUserId", friendUserId);
+        context.startActivity(intent);
     }
 
     private boolean isUserFollowed(String userId) {
