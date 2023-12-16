@@ -18,6 +18,7 @@
         <activity android:name=".activity.UserProfileActivity" android:exported="false" />
         <activity android:name=".Class.User" android:exported="false" />
         <activity android:name=".activity.homePageActivity" android:exported="false" />
+        <activity android:name=".activity.MainActivity$FriendMapActivity" android:exported="false" />
         <activity android:name=".activity.MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
