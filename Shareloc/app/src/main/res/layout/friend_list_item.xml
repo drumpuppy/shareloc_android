@@ -20,13 +20,6 @@
         android:src="@drawable/follow" />
 
     <ImageView
-        android:id="@+id/imgViewMap"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/view_map"
-        android:visibility="gone" />
-
-    <ImageView
         android:id="@+id/imgUnfollow"
         android:layout_width="48dp"
         android:layout_height="48dp"
