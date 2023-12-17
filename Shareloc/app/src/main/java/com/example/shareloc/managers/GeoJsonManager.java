@@ -27,6 +27,7 @@ public class GeoJsonManager {
     }
 
     public void loadGeoJsonLayer(String filename) {
+        Log.d("GeoJsonManager", "Loading GeoJSON Layer: " + filename);
         String geoJsonData = loadGeoJsonFromAsset(filename);
         if (geoJsonData != null) {
             addGeoJsonLayerToMap(geoJsonData, filename);
@@ -51,6 +52,7 @@ public class GeoJsonManager {
     }
 
     private void addGeoJsonLayerToMap(String geoJsonData, String countryName) {
+        Log.d("GeoJsonManager", "Adding GeoJSON layer to map for country: " + countryName);
         try {
             JSONObject geoJson = new JSONObject(geoJsonData);
             GeoJsonLayer layer = new GeoJsonLayer(map, geoJson);

@@ -4,84 +4,96 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.example.shareloc.R;
-import com.google.android.gms.maps.CameraUpdateFactory;
+import com.example.shareloc.managers.GeoJsonManager;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class FriendMapActivity extends AppCompatActivity implements OnMapReadyCallback {
+import java.util.Map;
 
-    private GoogleMap googleMap;
+public class FriendMapActivity extends BaseActivity implements OnMapReadyCallback {
+
+    private GoogleMap nMap;
     private String friendUserId;
+    private GeoJsonManager geoJsonManager;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_friend_map);
+        setupMapFragment();
+        geoJsonManager = new GeoJsonManager(this, nMap);
 
-        friendUserId = getIntent().getStringExtra("friendId");
+        friendUserId = getIntent().getStringExtra("friendUserId");
+    }
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            return;
-        }
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+    private void setupMapFragment() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (nMap != null) {
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+                    nMap.setMyLocationEnabled(true);
+                    nMap.getUiSettings().setMyLocationButtonEnabled(true);
+                }
+            }
+        }
+    }
 
     @Override
-    public void onMapReady(GoogleMap map) {
-        Log.d("FriendMapActivity", "onMapReady called");
-        googleMap = map;
+    protected int getLayoutId() { return R.layout.activity_friend_map; }
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        nMap = googleMap;
+        geoJsonManager = new GeoJsonManager(this, nMap);
+        loadFriendCountriesVisited();
+    }
 
-        DatabaseReference friendLocationRef = FirebaseDatabase.getInstance().getReference("userLocations").child(friendUserId);
-        friendLocationRef.addListenerForSingleValueEvent(new ValueEventListener() {
+    private void loadFriendCountriesVisited() {
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(friendUserId);
+        userRef.child("countriesVisited").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Log.d("FriendMapActivity", "onDataChange called");
-
                 if (dataSnapshot.exists()) {
-                    double latitude = dataSnapshot.child("latitude").getValue(Double.class);
-                    double longitude = dataSnapshot.child("longitude").getValue(Double.class);
-                    Log.d("FriendMapActivity", "Latitude: " + latitude + ", Longitude: " + longitude);
-
-                    LatLng friendLocation = new LatLng(latitude, longitude);
-                    googleMap.addMarker(new MarkerOptions().position(friendLocation).title("Friend's Location"));
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(friendLocation));
-                    googleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+                    for (DataSnapshot countrySnapshot : dataSnapshot.getChildren()) {
+                        String countryName = countrySnapshot.getKey();
+                        Boolean visited = countrySnapshot.getValue(Boolean.class);
+                        if (visited != null && !visited) {
+                            geoJsonManager.loadGeoJsonLayer(countryName + ".geojson");
+                        }
+                    }
                 } else {
-                    Log.e("FriendMapActivity", "Friend's location data not available");
-                    Toast.makeText(FriendMapActivity.this, "Friend's location data not available", Toast.LENGTH_SHORT).show();
-                    finish();
+                    Log.d("FriendMapActivity", "No countries visited data found for user ID: " + friendUserId);
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e("FriendMapActivity", "onCancelled called: " + databaseError.getMessage());
-                Toast.makeText(FriendMapActivity.this, "Error loading friend's location data", Toast.LENGTH_SHORT).show();
-                finish();
+                Log.e("FriendMapActivity", "Error fetching visited countries: " + databaseError.toException());
             }
         });
     }
-
 }

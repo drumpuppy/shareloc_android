@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 
 import com.example.shareloc.Class.User;
 import com.example.shareloc.R;
+import com.example.shareloc.activity.FriendMapActivity;
 import com.example.shareloc.activity.MainActivity;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -83,7 +84,7 @@ public class FriendListAdapter extends ArrayAdapter<User> {
     }
 
     private void openFriendMap(String friendUserId) {
-        Intent intent = new Intent(context, MainActivity.FriendMapActivity.class);
+        Intent intent = new Intent(context, FriendMapActivity.class);
         intent.putExtra("friendUserId", friendUserId);
         context.startActivity(intent);
     }

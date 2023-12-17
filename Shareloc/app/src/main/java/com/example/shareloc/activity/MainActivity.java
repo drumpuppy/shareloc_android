@@ -59,8 +59,5 @@ public class MainActivity extends BaseActivity {
         Intent intent = new Intent(MainActivity.this, FranceMapActivity.class);
         startActivity(intent);
     }
-
-    public static class FriendMapActivity extends Activity {
-    }
 }
 
