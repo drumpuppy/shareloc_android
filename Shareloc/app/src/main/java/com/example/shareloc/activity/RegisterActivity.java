@@ -49,17 +49,16 @@ public class RegisterActivity extends AppCompatActivity {
 
         if (email.isEmpty() || password.isEmpty()) {
             if (email.isEmpty()) {
-                emailEditText.setError("Email is required");
+                emailEditText.setError("Email est nécéssaire");
             }
             if (password.isEmpty()) {
-                passwordEditText.setError("Password is required");
+                passwordEditText.setError("Le mot de passe est requis");
             }
             return;
         }
 
         if (password.length() < 6) {
-            // Afficher un message d'erreur si le mot de passe a moins de 6 caractères
-            passwordEditText.setError("Password must be at least 6 characters");
+            passwordEditText.setError("le mot de passe doit faire au moins 6 charactères");
             return;
         }
 
@@ -71,11 +70,11 @@ public class RegisterActivity extends AppCompatActivity {
                             initializeUserData(firebaseUser.getUid(), email);
                         }
 
-                        Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Enregistrement réussi", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(this, MainActivity.class));
                         finish();
                     } else {
-                        Toast.makeText(this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "la connexion à échoué.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }

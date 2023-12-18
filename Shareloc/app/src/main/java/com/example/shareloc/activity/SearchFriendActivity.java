@@ -84,7 +84,7 @@ public class SearchFriendActivity extends BaseActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e("SearchFriendActivity", "Error fetching users: " + databaseError.getMessage());
-                Toast.makeText(SearchFriendActivity.this, "Error fetching users: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SearchFriendActivity.this, "erreur pendant la récupération des données: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

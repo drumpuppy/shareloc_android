@@ -11,15 +11,13 @@ import java.util.Map;
 
 public class User {
     private String userId;
-    private String email;
-
     private String username;
     private String nickname;
     private Map<String, Boolean> countriesVisited;
+    private Map<String, Boolean> mapVisited;
     private Map<String, Boolean> achievements;
     private List<Location> positions_found;
     private UserLocation lastUpdatedPosition;
-    GeoJsonManager geoJsonManager;
     public User() {
         this.username = "";
         this.nickname = "";
@@ -27,6 +25,8 @@ public class User {
         this.achievements = createDefaultAchievements();
         this.positions_found = createDefaultPostionFound();
         this.lastUpdatedPosition = new UserLocation();
+        mapVisited = new HashMap<>();
+
     }
     public User(String username,String nickname) {
         this.username = username;
@@ -35,16 +35,13 @@ public class User {
         this.achievements = createDefaultAchievements();
         this.positions_found = createDefaultPostionFound();
         this.lastUpdatedPosition = new UserLocation();
+        mapVisited = new HashMap<>();
     }
 
-
-    public UserLocation getLastUpdatedPosition() {
-        return lastUpdatedPosition;
+    public Map<String, Boolean> getMapVisited() {
+        return mapVisited;
     }
 
-    public void setLastUpdatedPosition(UserLocation lastUpdatedPosition) {
-        this.lastUpdatedPosition = lastUpdatedPosition;
-    }
     private List<Location> createDefaultPostionFound(){
         return new ArrayList<>();
     }
@@ -83,26 +80,11 @@ public class User {
         this.nickname = nickname;
     }
 
-    public void setCountriesVisited(Map<String, Boolean> countriesVisited) {
-        this.countriesVisited = countriesVisited;
-    }
-
-    public void setAchievements(Map<String, Boolean> achievements) {
-        this.achievements = achievements;
-    }
     public String getUserId() {
         return userId;
     }
 
     public void setUserId(String userId) {
         this.userId = userId;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 }

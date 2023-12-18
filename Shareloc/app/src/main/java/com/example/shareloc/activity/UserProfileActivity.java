@@ -25,8 +25,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.Arrays;
+
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 
 public class UserProfileActivity extends BaseActivity {
@@ -73,6 +78,16 @@ public class UserProfileActivity extends BaseActivity {
     protected int getLayoutId() {
         return R.layout.activity_user_profile;
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadUserData();
+        checkAndUnlockFriendBasedAchievements();
+        checkAndUpdateAchievements();
+        checkAndUnlockSoloAchievement();
+    }
+
 
     private void loadUserData() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -223,5 +238,179 @@ public class UserProfileActivity extends BaseActivity {
         }
     }
 
+    private void checkAndUpdateAchievements() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+
+            userRef.child("countriesVisited").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    long visitedCount = 0;
+                    boolean visitedVatican = false;
+                    boolean visitedAllCommonwealth = true; // Assume true, check if false
+                    List<String> commonwealthCountries = getCommonwealthCountries();
+
+                    for (DataSnapshot countrySnapshot : dataSnapshot.getChildren()) {
+                        if (countrySnapshot.getValue(Boolean.class)) {
+                            visitedCount++;
+                            String countryName = countrySnapshot.getKey();
+                            if ("Vatican".equals(countryName)) {
+                                visitedVatican = true;
+                            }
+                            if (commonwealthCountries.contains(countryName)) {
+                                commonwealthCountries.remove(countryName);
+                            }
+                        }
+                    }
+
+                    if (visitedCount >= 40)
+                        unlockAchievement("Expert: trouve 40 pays");
+                    else if (visitedCount >= 5) {
+                        unlockAchievement("Randoneur: découvre 5 pays");
+                    } else if (visitedCount > 0) {
+                        unlockAchievement("Mon petit poney : trouve ton premier pays");
+                    }
+                    if (visitedVatican) unlockAchievement("Holy Moly: va au Vatican");
+                    if (commonwealthCountries.isEmpty()) unlockAchievement("God Save the Queen: trouve tous les pays du CommonWealth");
+
+                    long finalVisitedCount = visitedCount;
+                    getAllCountriesCount(totalCountries -> {
+                        if (finalVisitedCount == totalCountries) unlockAchievement("Mister WorldWide: découvre le monde entier !");
+                    });
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.e("UserProfileActivity", "Error fetching countries visited: " + databaseError.toException());
+                }
+            });
+        } else {
+            Log.w("UserProfileActivity", "No authenticated user found");
+        }
+    }
+
+    private List<String> getCommonwealthCountries() {
+        return Arrays.asList("Canada", "Australia", "India", "United Kingdom");
+    }
+
+    private void getAllCountriesCount(Consumer<Long> onResult) {
+        DatabaseReference countriesRef = FirebaseDatabase.getInstance().getReference("countries");
+        countriesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                onResult.accept(dataSnapshot.getChildrenCount());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("UserProfileActivity", "Error fetching total number of countries: " + databaseError.toException());
+            }
+        });
+    }
+
+    private void checkAndUnlockSoloAchievement() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            DatabaseReference friendListRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("friendList");
+
+            friendListRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
+                        unlockAchievement("I go solo: fais toi un ami");
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.e("UserProfileActivity", "Error checking friends list for achievements: " + databaseError.toException());
+                }
+            });
+        }
+    }
+
+    private void unlockAchievement(String achievementName) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            DatabaseReference userAchievementsRef = FirebaseDatabase.getInstance().getReference("users")
+                    .child(userId)
+                    .child("achievements");
+
+            userAchievementsRef.child(achievementName).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists() && Boolean.TRUE.equals(snapshot.getValue(Boolean.class))) {
+                        // Achievement already unlocked, do nothing
+                        Log.d("UserProfileActivity", "Achievement already unlocked: " + achievementName);
+                    } else {
+                        userAchievementsRef.child(achievementName).setValue(true)
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("UserProfileActivity", "succès débloqué: " + achievementName);
+                                    showAchievementUnlockedPopup(achievementName);
+                                })
+                                .addOnFailureListener(e -> Log.e("UserProfileActivity", "erreur pendant le deblocage: " + e.getMessage()));
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.e("UserProfileActivity", "Error checking achievement status: " + databaseError.toException());
+                }
+            });
+        } else {
+            Log.w("UserProfileActivity", "No authenticated user found");
+        }
+    }
+
+
+    private void showAchievementUnlockedPopup(String achievementName) {
+        String message = "Bravo! tu as débloqué le succès : \n" + achievementName;
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+
+
+    private void checkAndUnlockFriendBasedAchievements() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    User user = dataSnapshot.getValue(User.class);
+                    if (user != null) {
+                        Map<String, Boolean> mapVisited = user.getMapVisited();
+                        int uniqueMapVisitedCount = countUniqueMapVisited(mapVisited);
+
+                        if (uniqueMapVisitedCount >= 1) unlockAchievement("Où es-tu ?: découvre la carte d'un(e) ami(e)");
+                        if (uniqueMapVisitedCount >= 5) unlockAchievement("Stalker: découvre la carte de 5 amis");
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.e("UserProfileActivity", "Error fetching user data: " + databaseError.toException());
+                }
+            });
+        } else {
+            Log.w("UserProfileActivity", "No authenticated user found");
+        }
+    }
+
+    private int countUniqueMapVisited(Map<String, Boolean> mapVisited) {
+        int count = 0;
+        for (Boolean visited : mapVisited.values()) {
+            if (Boolean.TRUE.equals(visited)) {
+                count++;
+            }
+        }
+        return count;
+    }
 
 }

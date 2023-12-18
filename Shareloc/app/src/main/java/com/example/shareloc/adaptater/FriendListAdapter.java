@@ -142,18 +142,18 @@ public class FriendListAdapter extends ArrayAdapter<User> {
                 if (!alreadyFriend) {
                     friendListRef.push().setValue(userId)
                             .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(context, "Followed user", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "Utilisateur ajouté(e)", Toast.LENGTH_SHORT).show();
                                 refreshActivity(sourceActivityClass);
                             })
-                            .addOnFailureListener(e -> Toast.makeText(context, "Failed to follow user", Toast.LENGTH_SHORT).show());
+                            .addOnFailureListener(e -> Toast.makeText(context, "echec, veuillez réessayer", Toast.LENGTH_SHORT).show());
                 } else {
-                    Toast.makeText(context, "User already followed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "utilisateur est déjà ajouté(e)", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(context, "Error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Erreur: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -177,18 +177,18 @@ public class FriendListAdapter extends ArrayAdapter<User> {
                 if (keyToRemove != null) {
                     friendListRef.child(keyToRemove).removeValue()
                             .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(context, "Unfollowed user", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "Désabonnement réussi", Toast.LENGTH_SHORT).show();
                                 refreshActivity(sourceActivityClass);
                             })
                             .addOnFailureListener(e -> Toast.makeText(context, "Failed to unfollow user", Toast.LENGTH_SHORT).show());
                 } else {
-                    Toast.makeText(context, "User not found in friend list", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "l'utilisateur n'a pas été trouvé(e)", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(context, "Error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Erreur: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

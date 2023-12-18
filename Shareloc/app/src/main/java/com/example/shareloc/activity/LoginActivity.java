@@ -39,19 +39,17 @@ public class LoginActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(LoginActivity.this, "Email and password must not be empty", Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "l'email et le mot de passe ne peuvent pas être vide", Toast.LENGTH_SHORT).show();
             return;
         }
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Sign in success
                         FirebaseUser user = mAuth.getCurrentUser();
                         updateUI(user);
                     } else {
-                        // If sign in fails, display a message to the user.
-                        Snackbar.make(findViewById(android.R.id.content), "Authentication failed.", Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(findViewById(android.R.id.content), "Echec de l'Authentification.", Snackbar.LENGTH_SHORT).show();
                         updateUI(null);
                     }
                 });
@@ -59,7 +57,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private void updateUI(FirebaseUser user) {
         if (user != null) {
-            // Navigate to Main Activity or another activity after successful login
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             finish();

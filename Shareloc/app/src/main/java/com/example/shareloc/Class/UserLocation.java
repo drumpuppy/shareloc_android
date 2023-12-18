@@ -24,27 +24,13 @@ public class UserLocation {
         Location.distanceBetween(this.latitude, this.longitude, location.getLatitude(), location.getLongitude(), results);
         return results[0] < thresholdDistance;
     }
-    public Location toLocation() {
-        Location location = new Location("");
-        location.setLatitude(latitude);
-        location.setLongitude(longitude);
-        return location;
-    }
 
     public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
     public double getLongitude() {
         return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
     }
 }
 
