@@ -48,6 +48,9 @@ public class AmisActivity extends BaseActivity {
         currentUserId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
         friendListRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId).child("friendList");
 
+        ImageView backButton = findViewById(R.id.back_button);
+        backButton.setOnClickListener(view -> finish());
+
         setupAdapter();
         loadFriends();
 
@@ -60,8 +63,8 @@ public class AmisActivity extends BaseActivity {
             public void afterTextChanged(Editable s) {}
         });
 
-        ImageView backButton = findViewById(R.id.loupe);
-        backButton.setOnClickListener(view -> openSearchActivity());
+        ImageView loupeButton = findViewById(R.id.loupe);
+        loupeButton.setOnClickListener(view -> openSearchActivity());
     }
 
     private void setupAdapter() {

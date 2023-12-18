@@ -2,6 +2,8 @@ package com.example.shareloc.managers;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -34,7 +36,7 @@ public class GeoJsonManager {
         }
     }
 
-    private String loadGeoJsonFromAsset(String filename) {
+    public String loadGeoJsonFromAsset(String filename) {
         try {
             InputStream is = context.getAssets().open(filename);
             int size = is.available();
@@ -51,7 +53,7 @@ public class GeoJsonManager {
         }
     }
 
-    private void addGeoJsonLayerToMap(String geoJsonData, String countryName) {
+    public void addGeoJsonLayerToMap(String geoJsonData, String countryName) {
         Log.d("GeoJsonManager", "Adding GeoJSON layer to map for country: " + countryName);
         try {
             JSONObject geoJson = new JSONObject(geoJsonData);
@@ -60,11 +62,19 @@ public class GeoJsonManager {
             style.setFillColor(Color.BLACK);
             style.setStrokeColor(Color.BLACK);
             style.setStrokeWidth(2f);
-            layer.addLayerToMap();
+
+            new Handler(Looper.getMainLooper()).post(() -> {
+                try {
+                    layer.addLayerToMap();
+                } catch (Exception e) {
+                    Log.e("GeoJsonManager", "Error adding layer to map for country: " + countryName, e);
+                }
+            });
         } catch (Exception e) {
             Log.e("GeoJsonManager", "Problem reading GeoJSON file for country: " + countryName, e);
         }
     }
+
 
     public String mapCountryNameToFileName(String countryName) {
         Map<String, String> countryNameToFileMap = new HashMap<>();
@@ -88,6 +98,7 @@ public class GeoJsonManager {
         countryNameToFileMap.put("Hungary", "hungary");
         countryNameToFileMap.put("Ireland", "ireland");
         countryNameToFileMap.put("Italy", "italy");
+        countryNameToFileMap.put("Kosovo", "kosovo");
         countryNameToFileMap.put("Latvia", "latvia");
         countryNameToFileMap.put("Lithuania", "lithuania");
         countryNameToFileMap.put("Luxembourg", "luxembourg");
@@ -279,6 +290,7 @@ public class GeoJsonManager {
         countries.put("hungary", false);
         countries.put("ireland", false);
         countries.put("italy", false);
+        countries.put("kosovo", false);
         countries.put("latvia", false);
         countries.put("lithuania", false);
         countries.put("luxembourg", false);

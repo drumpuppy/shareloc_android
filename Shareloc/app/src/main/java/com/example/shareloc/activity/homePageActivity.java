@@ -7,6 +7,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,6 +40,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class homePageActivity extends BaseActivity implements OnMapReadyCallback {
@@ -48,14 +51,20 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
         private FusedLocationProviderClient fusedLocationClient;
         private LocationCallback locationCallback;
         private GeoJsonManager geoJsonManager;
+        private ExecutorService executorService;
+
 
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
+                executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                 setupMapFragment();
                 fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
                 setupLocationCallback();
                 geoJsonManager = new GeoJsonManager(this, mMap);
+
+                ImageView refreshButton = findViewById(R.id.refresh);
+                refreshButton.setOnClickListener(view -> refreshMap());
         }
         private void setupMapFragment() {
                 SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -104,33 +113,81 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                 LOCATION_PERMISSION_REQUEST_CODE);
                 }
-
-                loadCurrentUserAndSetupMap();
                 fetchAndDisplayAllUsersLocations();
+                loadCurrentUserAndSetupMap();
         }
 
         private void fetchAndDisplayAllUsersLocations() {
-                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
-                usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                if (firebaseUser != null) {
+                        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(firebaseUser.getUid());
+                        userRef.child("friendList").addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.exists()) {
+                                                for (DataSnapshot friendSnapshot : dataSnapshot.getChildren()) {
+                                                        String friendUserId = friendSnapshot.getValue(String.class);
+                                                        if (friendUserId != null) {
+                                                                executorService.submit(() -> {
+                                                                        fetchFriendLocation(friendUserId);
+                                                                });
+                                                        } else {
+                                                                Log.d("homePageActivity", "Invalid friend ID found: " + friendSnapshot.getKey());
+                                                        }
+                                                }
+                                        } else {
+                                                Log.d("homePageActivity", "No friends found for the user.");
+                                        }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+                                        Log.e("homePageActivity", "Error fetching friends list", databaseError.toException());
+                                }
+                        });
+                } else {
+                        Log.w("homePageActivity", "FirebaseUser is null");
+                }
+        }
+
+
+
+        private void fetchFriendLocation(String friendUserId) {
+                DatabaseReference friendRef = FirebaseDatabase.getInstance().getReference("users").child(friendUserId);
+
+                friendRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                                        DataSnapshot lastUpdatedPosSnapshot = userSnapshot.child("lastUpdatedPosition");
-                                        if (lastUpdatedPosSnapshot.exists()) {
-                                                double latitude = lastUpdatedPosSnapshot.child("latitude").getValue(Double.class);
-                                                double longitude = lastUpdatedPosSnapshot.child("longitude").getValue(Double.class);
-                                                LatLng userLocation = new LatLng(latitude, longitude);
-                                                mMap.addMarker(new MarkerOptions().position(userLocation).title(userSnapshot.child("username").getValue(String.class)));
+                                if (dataSnapshot.exists()) {
+                                        // Fetch username
+                                        String username = dataSnapshot.child("username").getValue(String.class);
+
+                                        // Fetch location
+                                        DataSnapshot locationSnapshot = dataSnapshot.child("lastUpdatedPosition");
+                                        if (locationSnapshot.exists()) {
+                                                double latitude = locationSnapshot.child("latitude").getValue(Double.class);
+                                                double longitude = locationSnapshot.child("longitude").getValue(Double.class);
+                                                LatLng friendLocation = new LatLng(latitude, longitude);
+
+                                                // Add marker with username as title
+                                                mMap.addMarker(new MarkerOptions().position(friendLocation).title(username));
+                                                Log.d("homePageActivity", "Added marker for " + username + "'s location: " + friendLocation);
+                                        } else {
+                                                Log.d("homePageActivity", "Location data not found for friend with ID: " + friendUserId);
                                         }
+                                } else {
+                                        Log.d("homePageActivity", "Friend data not found for ID: " + friendUserId);
                                 }
                         }
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
-                                Log.e("FranceMapActivity", "Error fetching user locations", databaseError.toException());
+                                Log.e("homePageActivity", "Error fetching friend's data", databaseError.toException());
                         }
                 });
         }
+
+
         private void loadCurrentUserAndSetupMap() {
                 FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                 if (firebaseUser != null) {
@@ -159,12 +216,22 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                         Map<String, Boolean> visitedCountries = currentUser.getCountriesVisited();
                         for (String country : visitedCountries.keySet()) {
                                 if (Boolean.FALSE.equals(visitedCountries.get(country))) {
-                                        geoJsonManager.loadGeoJsonLayer(country + ".geojson");
+                                        executorService.submit(() -> {
+                                                geoJsonManager.loadGeoJsonLayer(country + ".geojson");
+                                        });
                                 }
                         }
                 }
         }
 
+
+        @Override
+        protected void onDestroy() {
+                super.onDestroy();
+                if (executorService != null && !executorService.isShutdown()) {
+                        executorService.shutdown();
+                }
+        }
 
         private void setupLocationCallback() {
                 LocationRequest locationRequest = LocationRequest.create();
@@ -227,12 +294,14 @@ public class homePageActivity extends BaseActivity implements OnMapReadyCallback
                 }
         }
 
+
         private void refreshMap() {
                 if (mMap == null) {
                         Log.e("homePageActivity", "Map is not ready to be refreshed");
                         return;
                 }
                 mMap.clear();
+                fetchAndDisplayAllUsersLocations();
                 loadCurrentUserAndSetupMap();
         }
 }

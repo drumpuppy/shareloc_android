@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -65,6 +66,9 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         setupLocationCallback();
         tvPercentageCovered = findViewById(R.id.tvPercentageCovered);
+
+        ImageView refreshButton = findViewById(R.id.refresh);
+        refreshButton.setOnClickListener(view -> refreshMap());
     }
 
     private void setupMapFragment() {
@@ -152,11 +156,7 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
             mMap.setMapStyle(new MapStyleOptions(customMapStyle));
         }
 
-        GeoJsonManager geoJsonManager = new GeoJsonManager(this, mMap);
-        List<String> country_list = Arrays.asList("luxembourg", "germany", "ireland", "belgium", "united-kingdom", "italy", "spain", "portugal", "switzerland", "netherlands", "austria");
-        for (String country : country_list) {
-            geoJsonManager.loadGeoJsonLayer(country + ".geojson");
-        }
+        loadlayout();
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
@@ -169,6 +169,14 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
         fetchAndDisplayCurrentUserLocations();
         fetchAndDisplayAllUsersLocations();
         fetchAndCalculateExploredPercentage();
+    }
+
+    private void loadlayout() {
+        GeoJsonManager geoJsonManager = new GeoJsonManager(this, mMap);
+        List<String> country_list = Arrays.asList("luxembourg", "germany", "ireland", "belgium", "united-kingdom", "italy", "spain", "portugal", "switzerland", "netherlands", "austria","denmark");
+        for (String country : country_list) {
+            geoJsonManager.loadGeoJsonLayer(country + ".geojson");
+        }
     }
 
     private void fetchAndCalculateExploredPercentage() {
@@ -222,24 +230,51 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
 
 
     private void fetchAndDisplayAllUsersLocations() {
-        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
-        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(firebaseUser.getUid());
+            userRef.child("friendList").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        for (DataSnapshot friendSnapshot : dataSnapshot.getChildren()) {
+                            String friendUserId = friendSnapshot.getKey();
+                            fetchFriendLocation(friendUserId);
+                        }
+                    } else {
+                        Log.d("homePageActivity", "No friends found for the user.");
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.e("homePageActivity", "Error fetching friends list", databaseError.toException());
+                }
+            });
+        } else {
+            Log.w("homePageActivity", "FirebaseUser is null");
+        }
+    }
+
+    private void fetchFriendLocation(String friendUserId) {
+        DatabaseReference friendLocationRef = FirebaseDatabase.getInstance().getReference("users").child(friendUserId).child("lastUpdatedPosition");
+        friendLocationRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                    DataSnapshot lastUpdatedPosSnapshot = userSnapshot.child("lastUpdatedPosition");
-                    if (lastUpdatedPosSnapshot.exists()) {
-                        double latitude = lastUpdatedPosSnapshot.child("latitude").getValue(Double.class);
-                        double longitude = lastUpdatedPosSnapshot.child("longitude").getValue(Double.class);
-                        LatLng userLocation = new LatLng(latitude, longitude);
-                        mMap.addMarker(new MarkerOptions().position(userLocation).title(userSnapshot.child("username").getValue(String.class)));
-                    }
+                if (dataSnapshot.exists()) {
+                    double latitude = dataSnapshot.child("latitude").getValue(Double.class);
+                    double longitude = dataSnapshot.child("longitude").getValue(Double.class);
+                    LatLng friendLocation = new LatLng(latitude, longitude);
+                    mMap.addMarker(new MarkerOptions().position(friendLocation).title("Friend's Location"));
+                    Log.d("homePageActivity", "Added marker for friend's location: " + friendLocation);
+                } else {
+                    Log.d("homePageActivity", "Location data not found for friend with ID: " + friendUserId);
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e("FranceMapActivity", "Error fetching user locations", databaseError.toException());
+                Log.e("homePageActivity", "Error fetching friend's location", databaseError.toException());
             }
         });
     }
@@ -317,5 +352,17 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
             return;
         }
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+    }
+
+    private void refreshMap() {
+        if (mMap == null) {
+            Log.e("homePageActivity", "Map is not ready to be refreshed");
+            return;
+        }
+        mMap.clear();
+        loadlayout();
+        fetchAndDisplayCurrentUserLocations();
+        fetchAndDisplayAllUsersLocations();
+        fetchAndCalculateExploredPercentage();
     }
 }

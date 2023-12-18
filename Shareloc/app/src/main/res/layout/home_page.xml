@@ -35,4 +35,22 @@
     android:layout_gravity="start"
     app:menu="@menu/drawer_menu"/>
 
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/refresh"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="22dp"
+            android:contentDescription="@string/refresh"
+            android:padding="8dp"
+            android:src="@drawable/refresh"
+            app:tint="@android:color/white" />
+    </RelativeLayout>
+
 </androidx.drawerlayout.widget.DrawerLayout>
