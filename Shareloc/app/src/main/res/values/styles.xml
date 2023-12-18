@@ -13,10 +13,27 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:padding">16dp</item>
-        <item name="android:hint">Nickname</item>
+        <item name="android:hint">Pseudo</item>
         <item name="android:inputType">textPersonName</item>
         <item name="android:background">@drawable/edit_text_background</item>
     </style>
 
+    <style name="FriendIdEditTextStyle" parent="EditTextStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:hint">"Identifiant de l ami"</item>
+        <item name="android:inputType">textPersonName</item>
+        <item name="android:background">@drawable/edit_text_background</item>
+    </style>
+
+    <style name="SearchFriendIdEditTextStyle" parent="EditTextStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:hint">"Identifiant du nouvel ami"</item>
+        <item name="android:inputType">textPersonName</item>
+        <item name="android:background">@drawable/edit_text_background</item>
+    </style>
 
 </resources>

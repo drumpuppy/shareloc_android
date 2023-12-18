@@ -82,6 +82,17 @@
         android:background="@android:color/transparent"
         android:enabled="false"
         android:checkable="false"/>
+    <item
+        android:title=""
+        android:background="@android:color/transparent"
+        android:enabled="false"
+        android:checkable="false"/>
+
+    <item
+        android:title=""
+        android:background="@android:color/transparent"
+        android:enabled="false"
+        android:checkable="false"/>
 
     <item
         android:id="@+id/nav_logout"
