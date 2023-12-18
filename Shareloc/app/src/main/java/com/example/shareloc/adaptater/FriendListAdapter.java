@@ -1,6 +1,7 @@
 package com.example.shareloc.adaptater;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -17,7 +18,6 @@ import androidx.annotation.NonNull;
 import com.example.shareloc.Class.User;
 import com.example.shareloc.R;
 import com.example.shareloc.activity.FriendMapActivity;
-import com.example.shareloc.activity.MainActivity;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -35,6 +35,9 @@ public class FriendListAdapter extends ArrayAdapter<User> {
     private List<String> friendUserIds;
     private OnDataChangeListener onDataChangeListener;
 
+    private Class<?> sourceActivityClass;
+
+
     public interface OnDataChangeListener {
         void onDataChanged();
     }
@@ -43,12 +46,13 @@ public class FriendListAdapter extends ArrayAdapter<User> {
         this.onDataChangeListener = listener;
     }
 
-    public FriendListAdapter(Context context, List<User> users, String currentUserId) {
+    public FriendListAdapter(Context context, List<User> users, String currentUserId, Class<?> sourceActivityClass) {
         super(context, R.layout.friend_list_item, users);
         this.context = context;
         this.users = users;
         this.currentUserId = currentUserId;
         this.friendUserIds = new ArrayList<>();
+        this.sourceActivityClass = sourceActivityClass;
         loadFriendUserIds();
     }
 
@@ -139,9 +143,7 @@ public class FriendListAdapter extends ArrayAdapter<User> {
                     friendListRef.push().setValue(userId)
                             .addOnSuccessListener(aVoid -> {
                                 Toast.makeText(context, "Followed user", Toast.LENGTH_SHORT).show();
-                                if (onDataChangeListener != null) {
-                                    onDataChangeListener.onDataChanged();
-                                }
+                                refreshActivity(sourceActivityClass);
                             })
                             .addOnFailureListener(e -> Toast.makeText(context, "Failed to follow user", Toast.LENGTH_SHORT).show());
                 } else {
@@ -176,9 +178,7 @@ public class FriendListAdapter extends ArrayAdapter<User> {
                     friendListRef.child(keyToRemove).removeValue()
                             .addOnSuccessListener(aVoid -> {
                                 Toast.makeText(context, "Unfollowed user", Toast.LENGTH_SHORT).show();
-                                if (onDataChangeListener != null) {
-                                    onDataChangeListener.onDataChanged();
-                                }
+                                refreshActivity(sourceActivityClass);
                             })
                             .addOnFailureListener(e -> Toast.makeText(context, "Failed to unfollow user", Toast.LENGTH_SHORT).show());
                 } else {
@@ -192,4 +192,10 @@ public class FriendListAdapter extends ArrayAdapter<User> {
             }
         });
     }
+    private void refreshActivity(Class<?> activityClass) {
+        Intent refresh = new Intent(context, activityClass);
+        context.startActivity(refresh);
+        ((Activity) context).finish();
+    }
+
 }

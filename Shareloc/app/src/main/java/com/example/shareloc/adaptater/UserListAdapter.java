@@ -12,8 +12,8 @@ import java.util.List;
 
 public class UserListAdapter extends FriendListAdapter {
 
-    public UserListAdapter(Context context, List<User> users, String currentUserId) {
-        super(context, users, currentUserId);
+    public UserListAdapter(Context context, List<User> users, String currentUserId, Class<?> sourceActivityClass) {
+        super(context, users, currentUserId, sourceActivityClass);
     }
 
     public void updateData(List<User> newUsers) {

@@ -60,14 +60,14 @@ public class SearchFriendActivity extends BaseActivity {
         });
     }
     private void setupAdapter() {
-        adapter = new UserListAdapter(this, new ArrayList<>(), currentUserId);
-        adapter.setOnDataChangeListener(() -> loadAllUsers());
+        adapter = new UserListAdapter(this, new ArrayList<>(), currentUserId, SearchFriendActivity.class);
+        adapter.setOnDataChangeListener(this::loadAllUsers);
         friendsListView.setAdapter(adapter);
     }
 
     private void loadAllUsers() {
         Log.d("SearchFriendActivity", "Loading all users");
-        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        usersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 allUsers.clear();
@@ -88,6 +88,7 @@ public class SearchFriendActivity extends BaseActivity {
             }
         });
     }
+
 
 
     private void loadUsernames(String searchTerm) {
