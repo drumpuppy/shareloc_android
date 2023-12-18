@@ -131,7 +131,7 @@ public class FranceMapActivity extends BaseActivity implements OnMapReadyCallbac
 
     @SuppressLint("SetTextI18n")
     private void displayExploredPercentage(double exploredPercentage) {
-        tvPercentageCovered.setText("Percentage covered: " + exploredPercentage + "%");
+        tvPercentageCovered.setText("% de découverte : " + exploredPercentage + "%");
     }
 
     @Override
